@@ -1,8 +1,1 @@
-feat: 客户端前端评价功能
-
-- api.js 新增 createReview/getProductReviews/getOrderReview API
-- ProductDetail.vue 增加用户评价展示区（评分+评论列表+商家回复）
-- OrderDetail.vue 已完成订单增加评价入口（查看已有评价/写评价）
-- 新建 ReviewForm.vue 评价提交页面（星级评分+文字评价+图片上传）
-- router.js 新增 /order/:orderNo/review 路由
-- style.css 新增评价相关样式
+chore: cleanup

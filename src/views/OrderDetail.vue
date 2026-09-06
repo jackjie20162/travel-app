@@ -37,6 +37,25 @@
         </div>
       </section>
 
+      <!-- 评价 -->
+      <section v-if="order.status === 'COMPLETED'" class="detail-section">
+        <h3>订单评价</h3>
+        <div v-if="existingReview" class="review-display">
+          <div class="review-stars-row">
+            <span v-for="n in 5" :key="n" class="star" :class="{ active: existingReview.rating >= n }">★</span>
+            <span class="review-date">{{ formatDate(existingReview.createtime) }}</span>
+          </div>
+          <p v-if="existingReview.content" class="review-text">{{ existingReview.content }}</p>
+          <div v-if="existingReview.replyContent" class="review-merchant-reply">
+            <strong>商家回复：</strong>{{ existingReview.replyContent }}
+          </div>
+        </div>
+        <div v-else class="review-prompt">
+          <p>您对这次旅行满意吗？快来分享您的体验吧！</p>
+          <router-link :to="`/order/${order.orderNo}/review`" class="btn-review">写评价</router-link>
+        </div>
+      </section>
+
       <!-- 操作 -->
       <div class="detail-actions">
         <router-link to="/orders" class="btn-secondary">返回订单列表</router-link>
@@ -49,11 +68,12 @@
 <script setup>
 import { ref, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getOrder } from '../api.js'
+import { getOrder, getOrderReview } from '../api.js'
 
 const route = useRoute()
 const order = ref(null)
 const loading = ref(true)
+const existingReview = ref(null)
 
 function statusText(s) {
   const map = {
@@ -78,6 +98,10 @@ async function loadOrder() {
   try {
     const data = await getOrder(route.params.orderNo)
     order.value = data
+    // Load review if completed
+    if (data.status === 'COMPLETED') {
+      loadReview()
+    }
   } catch (e) {
     console.error('加载订单失败', e)
     // 尝试从本地存储读取
@@ -93,4 +117,20 @@ async function loadOrder() {
 }
 
 onMounted(loadOrder)
+
+async function loadReview() {
+  try {
+    const resp = await getOrderReview(route.params.orderNo)
+    if (resp && resp.id) {
+      existingReview.value = resp
+    }
+  } catch {
+    // No review yet
+  }
+}
+
+function formatDate(ts) {
+  if (!ts) return ''
+  return new Date(ts * 1000).toLocaleDateString()
+}
 </script>

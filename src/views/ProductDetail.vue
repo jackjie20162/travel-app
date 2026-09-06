@@ -58,10 +58,10 @@
       </div>
 
       <!-- 6. 评分 -->
-      <div class="detail-rating-row">
-        <span class="rating-score">4.9</span>
-        <span class="rating-text">"行程安排合理"</span>
-        <span class="rating-count">{{ reviewCount }}条点评 &gt;</span>
+      <div class="detail-rating-row" @click="scrollToReviews">
+        <span class="rating-score">{{ avgRating ? avgRating.toFixed(1) : '--' }}</span>
+        <span class="rating-text">"好评如潮"</span>
+        <span class="rating-count">{{ reviewTotal }}条点评 &gt;</span>
       </div>
 
       <!-- 7. 产品亮点 -->
@@ -152,6 +152,29 @@
         <h2>预订须知</h2>
         <div class="booking-notice">
           <p>{{ product.bookingNotice }}</p>
+        </div>
+      </div>
+
+      <!-- 11. 用户评价 -->
+      <div class="detail-reviews-section" ref="reviewsSection">
+        <h2>用户评价 ({{ reviewTotal }})</h2>
+        <div v-if="reviews.length === 0 && !loading" class="reviews-empty">暂无评价，快来成为第一个评价的人吧！</div>
+        <div v-else class="reviews-list">
+          <div v-for="r in reviews" :key="r.id" class="review-item">
+            <div class="review-top">
+              <span class="review-user">{{ r.userName || '匿名用户' }}</span>
+              <div class="review-stars">
+                <span v-for="n in 5" :key="n" class="mini-star" :class="{ active: r.rating >= n }">★</span>
+              </div>
+            </div>
+            <p v-if="r.content" class="review-content">{{ r.content }}</p>
+            <div v-if="r.images" class="review-images">
+              <img v-for="(img, i) in r.images.split(',').filter(Boolean)" :key="i" :src="img" class="review-thumb" alt=""/>
+            </div>
+            <div v-if="r.replyContent" class="review-reply">
+              <strong>商家回复：</strong>{{ r.replyContent }}
+            </div>
+          </div>
         </div>
       </div>
 
@@ -293,7 +316,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getProductDetail, getProductPackages, checkInventory, batchInventory } from '../api.js'
+import { getProductDetail, getProductPackages, checkInventory, batchInventory, getProductReviews } from '../api.js'
 import { useFavorites } from '../composables/favorites.js'
 import { useUser } from '../composables/user.js'
 
@@ -316,10 +339,15 @@ const showBookingModal = ref(false)
 const showCalendar = ref(false)
 const showAlbum = ref(false)
 const dateStripRef = ref(null)
+const reviewsSection = ref(null)
 
 // 模拟数据
 const monthlySales = ref(79)
-const reviewCount = ref(131)
+
+// 评价数据
+const reviews = ref([])
+const reviewTotal = ref(0)
+const avgRating = ref(0)
 
 // 日历状态
 const calYear = ref(new Date().getFullYear())
@@ -595,10 +623,29 @@ async function loadProduct() {
     if (activePackages.value.length === 1) {
       selectPkg(activePackages.value[0])
     }
+    // Load reviews
+    loadReviews()
   } catch (e) {
     console.error('加载商品详情失败', e)
   } finally {
     loading.value = false
+  }
+}
+
+async function loadReviews() {
+  try {
+    const resp = await getProductReviews(route.params.id, { pageSize: 10 })
+    reviews.value = resp.items || []
+    reviewTotal.value = resp.total || 0
+    avgRating.value = resp.avgRating || 0
+  } catch (e) {
+    console.error('加载评价失败', e)
+  }
+}
+
+function scrollToReviews() {
+  if (reviewsSection.value) {
+    reviewsSection.value.scrollIntoView({ behavior: 'smooth' })
   }
 }
 
@@ -628,3 +675,78 @@ function goBooking() {
 
 onMounted(loadProduct)
 </script>
+
+<style scoped>
+.detail-reviews-section {
+  padding: 16px;
+}
+.detail-reviews-section h2 {
+  font-size: 17px;
+  margin: 0 0 12px;
+}
+.reviews-empty {
+  text-align: center;
+  color: #999;
+  padding: 24px 0;
+  font-size: 14px;
+}
+.review-item {
+  background: #fff;
+  border-radius: 10px;
+  padding: 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.review-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.review-user {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333;
+}
+.review-stars {
+  display: flex;
+  gap: 1px;
+}
+.mini-star {
+  font-size: 14px;
+  color: #ddd;
+}
+.mini-star.active {
+  color: #ffb400;
+}
+.review-content {
+  font-size: 14px;
+  color: #444;
+  line-height: 1.5;
+  margin: 6px 0;
+}
+.review-images {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 6px;
+}
+.review-thumb {
+  width: 60px;
+  height: 60px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.review-reply {
+  background: #f7f8fa;
+  border-radius: 6px;
+  padding: 8px 10px;
+  margin-top: 8px;
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+}
+.review-reply strong {
+  color: #e8a33a;
+}
+</style>

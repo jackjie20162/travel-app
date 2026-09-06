@@ -427,3 +427,16 @@ img{max-width:100%}
   .hero h1{font-size:36px}
   .quick-grid{grid-template-columns:repeat(4,1fr);max-width:400px}
 }
+
+/* ── Review (OrderDetail) ── */
+.review-display{padding:4px 0}
+.review-stars-row{display:flex;align-items:center;gap:4px;margin-bottom:8px}
+.review-stars-row .star{font-size:20px;color:#ddd}
+.review-stars-row .star.active{color:#ffb400}
+.review-date{margin-left:8px;font-size:12px;color:#999}
+.review-text{font-size:14px;color:#444;line-height:1.6;margin:6px 0}
+.review-merchant-reply{background:#f7f8fa;border-radius:8px;padding:10px 12px;margin-top:8px;font-size:13px;color:#555;line-height:1.5}
+.review-merchant-reply strong{color:#e8a33a}
+.review-prompt{text-align:center;padding:12px 0}
+.review-prompt p{font-size:14px;color:#666;margin-bottom:12px}
+.btn-review{display:inline-block;padding:10px 32px;background:linear-gradient(135deg,#ffb400,#ff8c00);color:#fff;border-radius:20px;font-size:14px;font-weight:600;text-decoration:none}

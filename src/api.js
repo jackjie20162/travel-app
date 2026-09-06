@@ -111,6 +111,24 @@ export function getMyOrders({ status, page = 1, pageSize = 20 } = {}) {
   return request(`/api/travel/my/orders${qs ? '?' + qs : ''}`)
 }
 
+/* ── 评价 ── */
+
+export function createReview(payload) {
+  return request('/api/travel/reviews', {
+    method: 'POST',
+    body: JSON.stringify(payload),
+  })
+}
+
+export function getProductReviews(productId, { page = 1, pageSize = 20 } = {}) {
+  const params = new URLSearchParams({ page: String(page), pageSize: String(pageSize) })
+  return request(`/api/travel/products/${productId}/reviews?${params}`)
+}
+
+export function getOrderReview(orderNo) {
+  return request(`/api/travel/my/orders/${orderNo}/review`)
+}
+
 /* ── 支付 ── */
 
 export function createPayment({ orderNo, provider, idempotencyKey }) {

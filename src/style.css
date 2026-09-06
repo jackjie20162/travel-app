@@ -1,1 +1,429 @@
-*{box-sizing:border-box}body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;background:#f7f8fa;color:#172033}.app{min-height:100vh;padding-bottom:72px}header{height:58px;background:#fff;display:flex;align-items:center;justify-content:space-between;padding:0 18px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:2}main{padding:24px 18px}.eyebrow{font-size:11px;letter-spacing:2px;color:#64748b;margin-top:10px}h1{font-size:32px;line-height:1.15;margin:10px 0}.muted{color:#64748b}.search{display:flex;background:#fff;border:1px solid #ddd;border-radius:12px;overflow:hidden;margin:20px 0}.search input{min-width:0;flex:1;border:0;padding:14px;outline:0}.search button,.planner button{border:0;padding:0 18px;font-weight:700;background:#172033;color:#fff}.planner{display:flex;align-items:center;justify-content:space-between;gap:12px;background:#fff;border-radius:16px;padding:18px;margin:20px 0}.planner p{font-size:13px;color:#64748b;margin:7px 0 0}.planner button{border-radius:9px;height:38px;white-space:nowrap}h2{font-size:21px}.card{background:#fff;border-radius:16px;overflow:hidden;margin:14px 0;border:1px solid #eee}.cover{height:135px;display:grid;place-items:center;background:#e9eef4;color:#64748b;font-size:20px}.body{padding:16px}.body h3{margin:6px 0}.body p{font-size:13px;color:#64748b}.center{text-align:center;padding:50px 10px;color:#64748b}.bottom{position:fixed;bottom:0;left:0;right:0;height:68px;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;align-items:center;z-index:3}.bottom span{font-size:21px;text-align:center}.bottom small{display:block;font-size:10px;color:#64748b;margin-top:2px}
+/* ── Reset & Base ── */
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:#f5f6fa;color:#1a1a2e;line-height:1.5;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+img{max-width:100%}
+
+/* ── App Shell ── */
+.app{min-height:100vh;display:flex;flex-direction:column}
+.app-main{flex:1;padding-bottom:72px}
+.app-main.no-tab{padding-bottom:0}
+
+/* ── Header ── */
+.app-header{height:52px;background:#fff;display:flex;align-items:center;padding:0 16px;border-bottom:1px solid #eee;position:sticky;top:0;z-index:100}
+.app-header .back-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:4px 12px 4px 0;color:#1a1a2e}
+.app-header .header-title{flex:1;text-align:center;font-size:16px;letter-spacing:1px;cursor:pointer}
+.app-header .icon-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:4px 0 4px 12px;color:#1a1a2e}
+
+/* ── Tab Bar ── */
+.tab-bar{position:fixed;bottom:0;left:0;right:0;height:64px;background:#fff;border-top:1px solid #eee;display:flex;justify-content:space-around;align-items:center;z-index:100}
+.tab-item{display:flex;flex-direction:column;align-items:center;gap:2px;color:#94a3b8;font-size:20px;text-decoration:none;transition:color .2s}
+.tab-item small{font-size:10px}
+.tab-item.active,.tab-item:hover{color:#1a1a2e}
+
+/* ── Common ── */
+.center{text-align:center;padding:40px 16px;color:#94a3b8}
+.empty{padding:60px 16px}
+.muted{color:#94a3b8;font-size:13px}
+.mono{font-family:"SF Mono",Monaco,Consolas,monospace;font-size:13px}
+.link{color:#2563eb;font-size:14px}
+.eyebrow{font-size:11px;letter-spacing:2px;color:#94a3b8;text-transform:uppercase}
+
+/* ── Buttons ── */
+.btn-primary{background:#1a1a2e;color:#fff;border:none;padding:14px 28px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-primary:disabled{opacity:.5;cursor:not-allowed}
+.btn-secondary{background:#fff;color:#1a1a2e;border:1px solid #ddd;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;transition:border-color .2s}
+.btn-secondary:hover{border-color:#1a1a2e}
+
+/* ── Home Page ── */
+.page-home{padding:0 16px}
+.hero{padding:32px 0 20px;text-align:center}
+.hero h1{font-size:28px;line-height:1.2;margin:8px 0}
+.hero .muted{margin-bottom:16px}
+.search-bar{display:flex;background:#fff;border:1px solid #e2e8f0;border-radius:14px;overflow:hidden;margin:16px 0}
+.search-bar input{flex:1;border:none;padding:14px 16px;outline:none;font-size:15px;background:transparent}
+.search-bar button{border:none;padding:0 20px;background:#1a1a2e;color:#fff;font-weight:600;cursor:pointer}
+
+/* Planner Card */
+.planner-card{display:flex;align-items:center;justify-content:space-between;gap:12px;background:linear-gradient(135deg,#1a1a2e,#2d3561);color:#fff;border-radius:16px;padding:20px;margin:16px 0;cursor:pointer}
+.planner-card p{font-size:13px;color:rgba(255,255,255,.7);margin:6px 0 0}
+.planner-card button{border:none;padding:10px 18px;background:rgba(255,255,255,.2);color:#fff;border-radius:10px;font-weight:600;white-space:nowrap;cursor:pointer}
+
+/* Destinations */
+.section{margin:24px 0}
+.section-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.section-header h2{font-size:20px}
+.dest-row{display:flex;gap:10px;overflow-x:auto;padding:4px 0;-webkit-overflow-scrolling:touch}
+.dest-chip{display:flex;align-items:center;gap:6px;background:#fff;border:1px solid #e2e8f0;border-radius:20px;padding:8px 16px;white-space:nowrap;cursor:pointer;font-size:14px;transition:border-color .2s}
+.dest-chip:hover{border-color:#1a1a2e}
+.dest-emoji{font-size:18px}
+
+/* Product Grid */
+.product-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:14px}
+.product-card{background:#fff;border-radius:16px;overflow:hidden;border:1px solid #eee;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.product-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
+.card-cover{height:120px;display:grid;place-items:center;background:linear-gradient(135deg,#e8ecf1,#f0f4f8);position:relative}
+.cover-emoji{font-size:40px}
+.fav-btn{position:absolute;top:8px;right:8px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:grid;place-items:center}
+.card-body{padding:12px}
+.card-dest{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px}
+.card-body h3{font-size:15px;margin:4px 0;line-height:1.3}
+.card-body p{font-size:12px;color:#64748b;margin:4px 0;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-footer{display:flex;align-items:center;justify-content:space-between;margin-top:8px}
+.card-footer strong{font-size:15px}
+.tag{font-size:11px;color:#94a3b8;background:#f1f5f9;padding:2px 6px;border-radius:4px}
+
+/* ── Explore Page ── */
+.page-explore{padding:16px}
+.page-explore h2{font-size:22px;margin-bottom:12px}
+.filter-bar{display:flex;gap:10px;margin-bottom:16px}
+.filter-bar input{flex:1;padding:12px 14px;border:1px solid #e2e8f0;border-radius:12px;outline:none;font-size:14px}
+.filter-bar select{padding:12px 14px;border:1px solid #e2e8f0;border-radius:12px;outline:none;font-size:14px;background:#fff}
+.ai-hint{background:#eff6ff;border:1px solid #bfdbfe;border-radius:12px;padding:12px 16px;margin-bottom:16px;font-size:13px;display:flex;align-items:center;gap:8px}
+.product-list{display:flex;flex-direction:column;gap:12px}
+.list-item{display:flex;align-items:center;gap:14px;background:#fff;border-radius:14px;padding:14px;border:1px solid #eee;cursor:pointer;transition:border-color .2s}
+.list-item:hover{border-color:#1a1a2e}
+.item-icon{font-size:32px;width:48px;text-align:center;flex-shrink:0}
+.item-info{flex:1;min-width:0}
+.item-info h3{font-size:15px;margin:2px 0}
+.item-info small{color:#94a3b8;font-size:12px}
+.item-info p{font-size:12px;color:#64748b;margin:4px 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item-price{text-align:right;flex-shrink:0}
+.item-price strong{font-size:15px;display:block}
+.item-price small{font-size:11px;color:#94a3b8}
+
+/* ── Product Detail (携程风格) ── */
+.page-detail{padding-bottom:0;background:#f5f6fa}
+
+/* 轮播 */
+.detail-carousel{position:relative;background:#fff}
+.carousel-main{height:220px;display:grid;place-items:center;background:linear-gradient(135deg,#e8ecf1,#f0f4f8);position:relative;cursor:pointer;overflow:hidden}
+.carousel-img{width:100%;height:100%;object-fit:cover}
+.carousel-placeholder{display:grid;place-items:center;width:100%;height:100%}
+.carousel-counter{position:absolute;bottom:8px;right:12px;background:rgba(0,0,0,.5);color:#fff;padding:2px 8px;border-radius:10px;font-size:12px}
+.carousel-tabs{display:flex;gap:0;padding:8px 12px;overflow-x:auto;background:#fff;border-bottom:1px solid #f0f0f0}
+.carousel-tab{font-size:12px;color:#94a3b8;padding:4px 10px;white-space:nowrap;cursor:pointer}
+.carousel-tab.active{color:#1a1a2e;font-weight:600;border-bottom:2px solid #ff6600}
+.album-btn{position:absolute;bottom:36px;right:12px;background:rgba(0,0,0,.5);color:#fff;border:none;border-radius:14px;padding:4px 12px;font-size:12px;cursor:pointer}
+.fav-btn-carousel{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.4);color:#fff;border:none;border-radius:50%;width:36px;height:36px;font-size:18px;cursor:pointer;display:grid;place-items:center}
+
+/* 价格行 */
+.detail-price-row{display:flex;align-items:baseline;justify-content:space-between;padding:12px 16px 4px;background:#fff}
+.price-main{display:flex;align-items:baseline;gap:2px}
+.price-symbol{color:#ff4400;font-size:14px;font-weight:700}
+.price-value{color:#ff4400;font-size:28px;font-weight:700}
+.price-unit{color:#ff4400;font-size:13px;margin-left:2px}
+.price-info-icon{color:#94a3b8;font-size:14px;margin-left:4px;cursor:help}
+.price-sales{color:#94a3b8;font-size:13px}
+
+/* 优惠标签 */
+.detail-promo-tags{display:flex;align-items:center;gap:6px;padding:4px 16px 8px;background:#fff;flex-wrap:wrap}
+.promo-tag{font-size:11px;padding:2px 6px;border-radius:3px;border:1px solid #ff4400;color:#ff4400}
+.promo-tag.new{background:#ff4400;color:#fff}
+.promo-link{font-size:12px;color:#ff4400;margin-left:auto;cursor:pointer}
+
+/* 标题 */
+.detail-title{font-size:18px;font-weight:700;line-height:1.4;padding:8px 16px 4px;background:#fff;margin:0}
+
+/* 标签行 */
+.detail-tags-row{display:flex;align-items:center;gap:6px;padding:4px 16px 8px;background:#fff;flex-wrap:wrap}
+.tag-blue{font-size:11px;color:#1e40af;background:#eff6ff;padding:2px 6px;border-radius:3px}
+.tag-orange{font-size:11px;color:#92400e;background:#fffbeb;padding:2px 6px;border-radius:3px}
+.tag-normal{font-size:12px;color:#64748b}
+
+/* 评分 */
+.detail-rating-row{display:flex;align-items:center;gap:8px;padding:4px 16px 12px;background:#fff}
+.rating-score{background:#ff6600;color:#fff;font-size:12px;font-weight:700;padding:2px 6px;border-radius:3px}
+.rating-text{font-size:12px;color:#64748b}
+.rating-count{font-size:12px;color:#94a3b8;margin-left:auto}
+
+/* 产品亮点卡片 */
+.detail-highlights-card{background:#fffdf5;border:1px solid #fef3c7;border-radius:12px;margin:12px 16px;padding:16px}
+.highlights-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px}
+.highlights-header h3{font-size:15px;margin:0;color:#1a1a2e}
+.highlights-emoji{font-size:24px}
+.highlights-list{overflow:hidden;transition:max-height .3s}
+.highlights-list:not(.expanded){max-height:4.5em}
+.highlight-item{font-size:13px;color:#64748b;margin:4px 0;display:flex;align-items:flex-start;gap:6px}
+.highlight-bullet{width:4px;height:4px;border-radius:50%;background:#ff6600;flex-shrink:0;margin-top:6px}
+.highlights-more{font-size:12px;color:#2563eb;cursor:pointer;text-align:right;margin-top:4px}
+
+/* 选择日期·套餐 */
+.detail-datetime-section{background:#fff;margin-top:12px;padding:16px}
+.datetime-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.datetime-header h2{font-size:17px;margin:0}
+.datetime-refund{font-size:12px;color:#059669}
+
+/* 横向日期条 */
+.date-strip{display:flex;gap:8px;overflow-x:auto;padding:4px 0 12px 16px;-webkit-overflow-scrolling:touch;position:relative}
+.date-strip::-webkit-scrollbar{display:none}
+.date-cell{flex-shrink:0;width:64px;text-align:center;padding:8px 4px;border:1px solid #e2e8f0;border-radius:8px;cursor:pointer;background:#fff;transition:border-color .2s}
+.date-cell.selected{border-color:#ff6600;background:#fff7ed}
+.date-cell.unavailable{opacity:.4;cursor:not-allowed}
+.date-cell.more-dates{border-color:#2563eb;color:#2563eb;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;min-width:56px;position:sticky;right:0;background:#fff;z-index:2;margin-left:auto;box-shadow:-4px 0 8px -4px rgba(0,0,0,.08)}
+.date-cell.more-dates::after{content:'›';font-size:18px;font-weight:700;color:#2563eb}
+.date-weekday{display:block;font-size:11px;color:#94a3b8}
+.date-cell.selected .date-weekday{color:#ff6600}
+.date-day{display:block;font-size:18px;font-weight:700;margin:2px 0}
+.date-price{display:block;font-size:11px;color:#ff4400}
+.date-unavailable{display:block;font-size:10px;color:#94a3b8}
+
+/* 套餐卡片 */
+.package-cards{display:flex;gap:10px;overflow-x:auto;padding:4px 0 12px;-webkit-overflow-scrolling:touch}
+.package-cards::-webkit-scrollbar{display:none}
+.package-card{flex-shrink:0;width:140px;border:1px solid #e2e8f0;border-radius:10px;padding:12px;cursor:pointer;position:relative;transition:border-color .2s;background:#fff}
+.package-card.selected{border-color:#ff6600;background:#fff7ed}
+.pkg-badge{position:absolute;top:-8px;left:8px;font-size:10px;padding:1px 6px;border-radius:3px;color:#fff}
+.pkg-badge.hot{background:#ff6600}
+.pkg-badge.low{background:#059669}
+.pkg-name{font-size:13px;font-weight:600;margin-bottom:2px}
+.pkg-desc{font-size:11px;color:#94a3b8;margin-bottom:6px}
+.pkg-price{display:flex;align-items:baseline;gap:2px}
+.pkg-price-value{font-size:16px;font-weight:700;color:#ff4400}
+.pkg-price-unit{font-size:11px;color:#ff4400}
+
+.datetime-footer{font-size:11px;color:#94a3b8;margin-top:4px}
+.datetime-footer2{font-size:12px;color:#94a3b8;margin-top:4px}
+.fav-count{color:#ff4400}
+
+/* 描述 */
+.detail-desc-section{background:#fff;margin-top:12px;padding:16px}
+.detail-desc-section h2{font-size:17px;margin-bottom:8px}
+.detail-desc-text{font-size:14px;color:#64748b;line-height:1.6;cursor:pointer}
+.detail-desc-text:not(.expanded){display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+
+/* 预订须知 */
+.detail-notice-section{background:#fff;margin-top:12px;padding:16px}
+.detail-notice-section h2{font-size:17px;margin-bottom:8px}
+
+/* 底部操作栏 v2 */
+.detail-action-bar-v2{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;padding:8px 16px;display:flex;align-items:center;gap:12px;z-index:50}
+.action-icons{display:flex;gap:16px}
+.action-icon{display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer}
+.action-icon span{font-size:20px}
+.action-icon small{font-size:10px;color:#64748b}
+.action-buttons{display:flex;gap:8px;flex:1}
+.btn-service{flex:1;background:#fff;color:#1a1a2e;border:1px solid #ddd;border-radius:20px;padding:10px;font-size:14px;font-weight:500;cursor:pointer}
+.btn-book-v2{flex:2;background:linear-gradient(135deg,#ff6600,#ff4400);color:#fff;border:none;border-radius:20px;padding:10px;font-size:15px;font-weight:700;cursor:pointer}
+.btn-book-v2:disabled{opacity:.4;cursor:not-allowed}
+
+/* 日历弹窗 */
+.calendar-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:grid;place-items:flex-end;z-index:200}
+.calendar-modal{background:#fff;border-radius:16px 16px 0 0;width:100%;max-height:85vh;overflow-y:auto;padding:0}
+.calendar-header{display:flex;align-items:center;justify-content:center;padding:16px;position:relative;border-bottom:1px solid #f0f0f0}
+.calendar-header h3{font-size:17px;margin:0}
+.cal-close{position:absolute;left:16px;background:none;border:none;font-size:20px;cursor:pointer;color:#64748b}
+.calendar-tip{background:#fff7ed;padding:10px 16px;font-size:12px;color:#ff6600;border-bottom:1px solid #fef3c7}
+
+/* 月份导航 */
+.cal-month-nav{display:flex;align-items:center;justify-content:center;gap:16px;padding:12px 16px}
+.cal-nav-btn{background:none;border:1px solid #e2e8f0;border-radius:50%;width:32px;height:32px;font-size:18px;cursor:pointer;display:grid;place-items:center}
+.cal-month-title{font-size:16px;font-weight:600}
+
+/* 星期标题 */
+.cal-weekdays{display:grid;grid-template-columns:repeat(7,1fr);text-align:center;padding:8px 16px 4px}
+.cal-weekday{font-size:12px;color:#94a3b8}
+.cal-weekday.weekend{color:#ff4400}
+
+/* 日期网格 */
+.cal-days{display:grid;grid-template-columns:repeat(7,1fr);gap:2px;padding:4px 16px 16px}
+.cal-day{text-align:center;padding:6px 2px;border-radius:8px;cursor:pointer;position:relative;min-height:56px;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.cal-day.empty{cursor:default}
+.cal-day.selected{background:#ff6600;color:#fff}
+.cal-day.unavailable{opacity:.3;cursor:not-allowed}
+.cal-day.today .cal-day-num{background:#ff6600;color:#fff;border-radius:50%;width:24px;height:24px;display:grid;place-items:center}
+.cal-day.weekend .cal-day-num{color:#ff4400}
+.cal-day.selected .cal-day-num{color:#fff}
+.cal-day-num{font-size:15px;font-weight:600}
+.cal-day-price{font-size:10px;color:#ff4400;margin-top:2px}
+.cal-day.selected .cal-day-price{color:rgba(255,255,255,.8)}
+.cal-day-unavail{font-size:9px;color:#94a3b8;margin-top:2px}
+.cal-holiday-tag{position:absolute;top:1px;right:2px;font-size:8px;background:#ff4400;color:#fff;padding:0 3px;border-radius:2px}
+
+/* 相册弹窗 */
+.album-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;padding:16px}
+.album-item{border-radius:8px;overflow:hidden;aspect-ratio:4/3;background:#f0f0f0}
+.album-item img{width:100%;height:100%;object-fit:cover}
+
+/* Booking Confirm Modal */
+.booking-confirm-info{background:#f8fafc;border-radius:10px;padding:12px 16px;margin:12px 16px 16px}
+.confirm-row{display:flex;justify-content:space-between;padding:6px 0;font-size:14px;border-bottom:1px solid #e2e8f0}
+.confirm-row:last-child{border-bottom:none}
+.confirm-row.total{font-size:15px;padding-top:10px;margin-top:4px;border-top:2px solid #e2e8f0}
+.modal-actions{display:flex;gap:10px;padding:0 16px 20px;justify-content:flex-end}
+
+/* Package List */
+.pkg-list{display:flex;flex-direction:column;gap:10px}
+.pkg-item{display:flex;align-items:center;justify-content:space-between;background:#fff;border:2px solid #e2e8f0;border-radius:12px;padding:14px;cursor:pointer;transition:border-color .2s}
+.pkg-item.selected{border-color:#1a1a2e;background:#f8fafc}
+.pkg-item h4{font-size:15px;margin:0}
+.pkg-item small{color:#94a3b8;font-size:12px}
+.pkg-status{font-size:12px;padding:4px 10px;border-radius:6px;background:#f1f5f9;color:#64748b}
+.pkg-status.ACTIVE{background:#ecfdf5;color:#059669}
+
+/* Date & Quantity */
+.date-input input{width:100%;padding:14px;border:1px solid #e2e8f0;border-radius:12px;font-size:15px;outline:none}
+.qty-control{display:flex;align-items:center;gap:20px}
+.qty-control button{width:40px;height:40px;border:1px solid #e2e8f0;border-radius:10px;background:#fff;font-size:20px;cursor:pointer}
+.qty-control span{font-size:20px;font-weight:600;min-width:30px;text-align:center}
+
+/* Inventory Status */
+.inventory-status{padding:12px 16px;border-radius:12px;background:#f8fafc}
+.available{color:#059669;font-weight:600}
+.unavailable{color:#dc2626;font-weight:600}
+.inv-price{font-size:13px;color:#64748b;margin-top:4px}
+
+/* Action Bar */
+.detail-action-bar{position:fixed;bottom:64px;left:0;right:0;background:#fff;border-top:1px solid #eee;padding:12px 16px;display:flex;align-items:center;justify-content:space-between;z-index:50}
+.action-price small{font-size:11px;color:#94a3b8;display:block}
+.action-price strong{font-size:20px}
+.btn-book{background:#1a1a2e;color:#fff;border:none;padding:14px 32px;border-radius:12px;font-size:15px;font-weight:600;cursor:pointer}
+.btn-book:disabled{opacity:.4;cursor:not-allowed}
+
+/* ── Booking Page ── */
+.page-booking{padding:16px;padding-bottom:80px}
+.page-booking h2{font-size:22px;margin-bottom:16px}
+.booking-summary{background:#fff;border-radius:14px;padding:16px;border:1px solid #eee;margin-bottom:16px}
+.booking-summary h3{font-size:16px;margin-bottom:12px}
+.summary-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px solid #f1f5f9}
+.summary-row:last-child{border-bottom:none}
+.summary-row.total{font-size:16px;padding-top:12px;border-top:2px solid #e2e8f0}
+.booking-section{margin:20px 0}
+.booking-section h3{font-size:17px;margin-bottom:12px}
+.booking-section label{display:block;margin-bottom:14px;font-size:14px;color:#64748b}
+.booking-section input,.booking-section textarea{display:block;width:100%;padding:12px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none;margin-top:4px;font-family:inherit}
+.booking-section input:focus,.booking-section textarea:focus{border-color:#1a1a2e}
+.notice{background:#fffbeb;border:1px solid #fde68a;border-radius:12px;padding:16px}
+.notice ul{padding-left:18px;margin:8px 0 0}
+.notice li{font-size:13px;color:#92400e;margin:4px 0}
+.booking-action{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #eee;padding:12px 16px;z-index:50}
+.booking-action .btn-primary{width:100%;text-align:center}
+
+/* ── Payment Page ── */
+.page-payment{padding:16px}
+.page-payment h2{font-size:22px;margin-bottom:16px}
+.payment-summary{background:#fff;border-radius:14px;padding:16px;border:1px solid #eee;margin-bottom:16px}
+.payment-section{margin:20px 0}
+.payment-section h3{font-size:17px;margin-bottom:12px}
+.pay-methods{display:flex;flex-direction:column;gap:10px}
+.pay-method{display:flex;align-items:center;gap:14px;background:#fff;border:2px solid #e2e8f0;border-radius:12px;padding:16px;cursor:pointer;transition:border-color .2s}
+.pay-method.selected{border-color:#1a1a2e}
+.pay-icon{font-size:28px}
+.pay-method h4{font-size:15px;margin:0}
+.pay-method small{color:#94a3b8;font-size:12px}
+.payment-action{margin-top:24px}
+.payment-action .btn-primary{width:100%;text-align:center}
+
+/* ── Order Success ── */
+.page-success{text-align:center;padding:60px 16px}
+.success-icon{width:72px;height:72px;border-radius:50%;background:#ecfdf5;color:#059669;font-size:36px;display:grid;place-items:center;margin:0 auto 20px}
+.page-success h1{font-size:24px;margin-bottom:12px}
+.page-success .muted{margin-bottom:8px}
+.success-actions{display:flex;flex-direction:column;gap:10px;margin-top:32px;align-items:center}
+.success-actions a{display:inline-block;min-width:200px;text-align:center}
+
+/* ── Payment Return ── */
+.page-pay-return{padding:16px;min-height:60vh}
+.result-state{text-align:center;padding:40px 0}
+.result-state h1{font-size:24px;margin-bottom:8px}
+.result-state h2{font-size:20px;margin-bottom:8px}
+.result-state .muted{margin-bottom:16px}
+.fail-icon{width:72px;height:72px;border-radius:50%;background:#fee2e2;color:#dc2626;font-size:36px;display:grid;place-items:center;margin:0 auto 20px}
+.error-msg{color:#dc2626;font-size:14px;margin:8px 0 16px;word-break:break-word}
+.result-card{background:#fff;border-radius:14px;padding:16px;border:1px solid #eee;margin:20px auto;max-width:400px;text-align:left}
+.result-row{display:flex;justify-content:space-between;padding:10px 0;font-size:14px;border-bottom:1px solid #f1f5f9}
+.result-row:last-child{border-bottom:none}
+.result-row.total{font-size:16px;padding-top:12px;margin-top:4px;border-top:2px solid #e2e8f0}
+.result-actions{display:flex;flex-direction:column;gap:10px;margin-top:28px;align-items:center}
+.result-actions a{display:inline-block;min-width:200px;text-align:center}
+.loading-state{padding:80px 0}
+.spinner{width:48px;height:48px;border:4px solid #e2e8f0;border-top-color:#1a1a2e;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── Orders List ── */
+.page-orders{padding:16px}
+.page-orders h2{font-size:22px;margin-bottom:16px}
+.order-list{display:flex;flex-direction:column;gap:12px}
+.order-card{background:#fff;border-radius:14px;padding:16px;border:1px solid #eee;cursor:pointer;transition:border-color .2s}
+.order-card:hover{border-color:#1a1a2e}
+.order-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.order-status{font-size:12px;padding:4px 10px;border-radius:6px;font-weight:600}
+.order-status.PENDING_PAYMENT{background:#fef3c7;color:#92400e}
+.order-status.PAYMENT_PROCESSING{background:#fef3c7;color:#92400e}
+.order-status.PAID{background:#dbeafe;color:#1e40af}
+.order-status.CONFIRMED{background:#ecfdf5;color:#059669}
+.order-status.CANCELLED{background:#fee2e2;color:#991b1b}
+.order-status.COMPLETED{background:#f1f5f9;color:#64748b}
+.order-status.REFUNDED{background:#f1f5f9;color:#64748b}
+.order-body{display:flex;justify-content:space-between;align-items:center}
+.order-info{display:flex;flex-direction:column;gap:2px}
+.order-info small{color:#94a3b8;font-size:12px}
+.order-info span{font-size:13px;color:#64748b}
+.order-footer{margin-top:8px}
+.order-footer small{color:#94a3b8;font-size:12px}
+
+/* ── Order Detail ── */
+.page-order-detail{padding:16px}
+.status-header{text-align:center;padding:24px;border-radius:16px;margin-bottom:16px;color:#fff}
+.status-header.PENDING_PAYMENT{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.status-header.PAYMENT_PROCESSING{background:linear-gradient(135deg,#f59e0b,#d97706)}
+.status-header.PAID{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.status-header.CONFIRMED{background:linear-gradient(135deg,#10b981,#059669)}
+.status-header.CANCELLED{background:linear-gradient(135deg,#ef4444,#dc2626)}
+.status-header.COMPLETED{background:linear-gradient(135deg,#6b7280,#4b5563)}
+.status-header.REFUNDED{background:linear-gradient(135deg,#6b7280,#4b5563)}
+.status-header h2{font-size:22px;margin-bottom:4px}
+.status-header p{opacity:.8}
+.detail-section{background:#fff;border-radius:14px;padding:16px;border:1px solid #eee;margin-bottom:14px}
+.detail-section h3{font-size:16px;margin-bottom:12px}
+.info-row{display:flex;justify-content:space-between;padding:8px 0;font-size:14px;border-bottom:1px solid #f8fafc}
+.info-row:last-child{border-bottom:none}
+.info-row.total{font-size:16px;border-top:2px solid #e2e8f0;padding-top:12px;margin-top:4px}
+.voucher-box{text-align:center;padding:20px;background:#f0fdf4;border:2px dashed #86efac;border-radius:12px}
+.voucher-no{font-size:20px;font-weight:700;font-family:monospace;letter-spacing:2px;margin-bottom:6px}
+.voucher-box small{color:#64748b}
+.detail-actions{display:flex;gap:10px;margin-top:16px}
+.detail-actions a{flex:1;text-align:center}
+
+/* ── Favorites ── */
+.page-favorites{padding:16px}
+.page-favorites h2{font-size:22px;margin-bottom:16px}
+
+/* ── Profile ── */
+.page-profile{padding:16px}
+.profile-header{text-align:center;padding:32px 0}
+.avatar{font-size:48px;margin-bottom:8px}
+.profile-header h2{font-size:20px;margin:4px 0}
+.profile-menu{background:#fff;border-radius:14px;border:1px solid #eee;overflow:hidden;margin:16px 0}
+.menu-item{display:flex;align-items:center;padding:16px;border-bottom:1px solid #f1f5f9;cursor:pointer;transition:background .2s}
+.menu-item:last-child{border-bottom:none}
+.menu-item:hover{background:#f8fafc}
+.menu-icon{font-size:20px;margin-right:12px}
+.menu-item span:nth-child(2){flex:1;font-size:15px}
+.arrow{color:#94a3b8;font-size:18px}
+.profile-section{margin:24px 0}
+.profile-section h3{font-size:17px;margin-bottom:12px}
+.quick-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.quick-item{text-align:center;background:#fff;border:1px solid #eee;border-radius:12px;padding:16px 8px;cursor:pointer;transition:border-color .2s}
+.quick-item:hover{border-color:#1a1a2e}
+.quick-item span{font-size:24px;display:block}
+.quick-item small{font-size:12px;color:#64748b;margin-top:4px;display:block}
+
+/* ── Modal ── */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.4);display:grid;place-items:center;z-index:200;padding:16px}
+.modal{background:#fff;border-radius:16px;padding:24px;width:100%;max-width:400px}
+.modal h3{font-size:18px;margin-bottom:12px}
+.modal label{display:block;margin-bottom:14px;font-size:14px;color:#64748b}
+.modal input{display:block;width:100%;padding:12px 14px;border:1px solid #e2e8f0;border-radius:10px;font-size:15px;outline:none;margin-top:4px}
+.modal-actions{display:flex;gap:10px;margin-top:16px;justify-content:flex-end}
+
+/* ── Error Toast ── */
+.error-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#dc2626;color:#fff;padding:12px 24px;border-radius:12px;font-size:14px;z-index:300;animation:fadeInUp .3s}
+@keyframes fadeInUp{from{opacity:0;transform:translateX(-50%) translateY(10px)}to{opacity:1;transform:translateX(-50%) translateY(0)}}
+
+/* ── Responsive ── */
+@media(min-width:768px){
+  .product-grid{grid-template-columns:repeat(3,1fr)}
+  .hero h1{font-size:36px}
+  .quick-grid{grid-template-columns:repeat(4,1fr);max-width:400px}
+}

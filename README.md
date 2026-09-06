@@ -13,7 +13,7 @@ No direct RPC/database or merchant-service dependency is allowed in the client.
 1. Install Node.js 20+ and Rust/Tauri prerequisites.
 2. Set `VITE_TRAVEL_API_BASE_URL` when Travel API is not `http://localhost:9200`.
 3. `npm install`
-4. `npm run dev` for H5/browser testing.
+4. `npm run dev --host` for H5/browser testing.
 5. `npm run tauri dev` for the Tauri shell.
 6. `npm run build` for production H5 build verification.
 

@@ -111,6 +111,13 @@ export function getMyOrders({ status, page = 1, pageSize = 20 } = {}) {
   return request(`/api/travel/my/orders${qs ? '?' + qs : ''}`)
 }
 
+export function requestRefund(orderNo, reason) {
+  return request(`/api/travel/my/orders/${orderNo}/refund`, {
+    method: 'POST',
+    body: JSON.stringify({ reason }),
+  })
+}
+
 /* ── 评价 ── */
 
 export function createReview(payload) {

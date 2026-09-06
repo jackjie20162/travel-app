@@ -64,13 +64,13 @@ const loadingMore = ref(false)
 const activeTab = ref('')
 const page = ref(1)
 const total = ref(0)
-const badges = reactive({ PENDING_PAYMENT: 0, PAID: 0 })
+const badges = reactive({ PENDING_PAYMENT: 0, PENDING_ACCEPTANCE: 0 })
 
 const tabs = [
   { value: '', label: '全部' },
   { value: 'PENDING_PAYMENT', label: '待支付' },
-  { value: 'PAID', label: '待核销' },
-  { value: 'CONFIRMED', label: '已确认' },
+  { value: 'PENDING_ACCEPTANCE', label: '待接单' },
+  { value: 'PENDING_VERIFY', label: '待核销' },
   { value: 'COMPLETED', label: '已完成' },
   { value: 'CANCELLED', label: '已取消' },
 ]
@@ -78,7 +78,10 @@ const tabs = [
 const statusMap = {
   PENDING_PAYMENT: '待支付',
   PAYMENT_PROCESSING: '支付处理中',
-  PAID: '待核销',
+  PENDING_ACCEPTANCE: '待接单',
+  PENDING_VERIFY: '待核销',
+  VERIFIED: '已核销',
+  PENDING_REFUND: '退款中',
   CONFIRMED: '已确认',
   COMPLETED: '已完成',
   CANCELLED: '已取消',
@@ -133,10 +136,10 @@ async function loadBadgeCounts() {
   try {
     const [p, a] = await Promise.all([
       getMyOrders({ status: 'PENDING_PAYMENT', page: 1, pageSize: 1 }),
-      getMyOrders({ status: 'PAID', page: 1, pageSize: 1 }),
+      getMyOrders({ status: 'PENDING_ACCEPTANCE', page: 1, pageSize: 1 }),
     ])
     badges.PENDING_PAYMENT = Number(p?.total || 0)
-    badges.PAID = Number(a?.total || 0)
+    badges.PENDING_ACCEPTANCE = Number(a?.total || 0)
   } catch { /* ignore */ }
 }
 

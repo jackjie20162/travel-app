@@ -34,6 +34,10 @@ img{max-width:100%}
 .btn-primary:disabled{opacity:.5;cursor:not-allowed}
 .btn-secondary{background:#fff;color:#1a1a2e;border:1px solid #ddd;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:500;cursor:pointer;transition:border-color .2s}
 .btn-secondary:hover{border-color:#1a1a2e}
+.btn-danger{background:#dc2626;color:#fff;border:none;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-danger:disabled{opacity:.5;cursor:not-allowed}
+.btn-warning{background:#f59e0b;color:#fff;border:none;padding:12px 24px;border-radius:12px;font-size:14px;font-weight:600;cursor:pointer;transition:opacity .2s}
+.btn-warning:disabled{opacity:.5;cursor:not-allowed}
 
 /* ── Home Page ── */
 .page-home{padding:0 16px}
@@ -350,7 +354,10 @@ img{max-width:100%}
 .order-status{font-size:12px;padding:4px 10px;border-radius:6px;font-weight:600}
 .order-status.PENDING_PAYMENT{background:#fef3c7;color:#92400e}
 .order-status.PAYMENT_PROCESSING{background:#fef3c7;color:#92400e}
-.order-status.PAID{background:#dbeafe;color:#1e40af}
+.order-status.PENDING_ACCEPTANCE{background:#ede9fe;color:#6d28d9}
+.order-status.PENDING_VERIFY{background:#dbeafe;color:#1e40af}
+.order-status.VERIFIED{background:#ecfdf5;color:#059669}
+.order-status.PENDING_REFUND{background:#fff7ed;color:#c2410c}
 .order-status.CONFIRMED{background:#ecfdf5;color:#059669}
 .order-status.CANCELLED{background:#fee2e2;color:#991b1b}
 .order-status.COMPLETED{background:#f1f5f9;color:#64748b}
@@ -367,7 +374,10 @@ img{max-width:100%}
 .status-header{text-align:center;padding:24px;border-radius:16px;margin-bottom:16px;color:#fff}
 .status-header.PENDING_PAYMENT{background:linear-gradient(135deg,#f59e0b,#d97706)}
 .status-header.PAYMENT_PROCESSING{background:linear-gradient(135deg,#f59e0b,#d97706)}
-.status-header.PAID{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.status-header.PENDING_ACCEPTANCE{background:linear-gradient(135deg,#8b5cf6,#7c3aed)}
+.status-header.PENDING_VERIFY{background:linear-gradient(135deg,#3b82f6,#1d4ed8)}
+.status-header.VERIFIED{background:linear-gradient(135deg,#10b981,#059669)}
+.status-header.PENDING_REFUND{background:linear-gradient(135deg,#f97316,#ea580c)}
 .status-header.CONFIRMED{background:linear-gradient(135deg,#10b981,#059669)}
 .status-header.CANCELLED{background:linear-gradient(135deg,#ef4444,#dc2626)}
 .status-header.COMPLETED{background:linear-gradient(135deg,#6b7280,#4b5563)}
@@ -382,8 +392,10 @@ img{max-width:100%}
 .voucher-box{text-align:center;padding:20px;background:#f0fdf4;border:2px dashed #86efac;border-radius:12px}
 .voucher-no{font-size:20px;font-weight:700;font-family:monospace;letter-spacing:2px;margin-bottom:6px}
 .voucher-box small{color:#64748b}
-.detail-actions{display:flex;gap:10px;margin-top:16px}
-.detail-actions a{flex:1;text-align:center}
+.refund-notice{background:#fff7ed;border-color:#fed7aa}
+.refund-notice p{font-size:14px;color:#9a3412;margin:4px 0}
+.detail-actions{display:flex;gap:10px;margin-top:16px;flex-wrap:wrap}
+.detail-actions a,.detail-actions button{flex:1;text-align:center;min-width:120px}
 
 /* ── Favorites ── */
 .page-favorites{padding:16px}

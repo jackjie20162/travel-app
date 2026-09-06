@@ -118,6 +118,12 @@ export function requestRefund(orderNo, reason) {
   })
 }
 
+export function cancelOrder(orderNo) {
+  return request(`/api/travel/my/orders/${orderNo}/cancel`, {
+    method: 'POST',
+  })
+}
+
 /* ── 评价 ── */
 
 export function createReview(payload) {

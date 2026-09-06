@@ -107,7 +107,7 @@
 <script setup>
 import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
-import { getOrder, getOrderReview, requestRefund } from '../api.js'
+import { getOrder, getOrderReview, requestRefund, cancelOrder } from '../api.js'
 
 const route = useRoute()
 const order = ref(null)
@@ -202,7 +202,7 @@ async function handleCancel() {
   if (!cancelReason.value.trim()) return
   cancelling.value = true
   try {
-    await requestRefund(route.params.orderNo, cancelReason.value)
+    await cancelOrder(route.params.orderNo)
     cancelDialogVisible.value = false
     alert('订单已取消')
     await loadOrder()

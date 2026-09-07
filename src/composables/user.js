@@ -27,6 +27,9 @@ export function useUser() {
   async function login({ email, captchaId, captchaAnswer, emailCode }) {
     const resp = await apiLogin({ email, captchaId, captchaAnswer, emailCode })
     const data = resp.data || resp
+    if (!data.token) {
+      throw new Error('登录失败：未返回有效凭证')
+    }
     authToken.value = data.token
     currentUser.value = data.user
     setToken(data.token)
@@ -37,6 +40,9 @@ export function useUser() {
   async function register({ username, password, email, mobile, nickname, captchaId, captchaAnswer, emailCode }) {
     const resp = await apiRegister({ username, password, email, mobile, nickname, captchaId, captchaAnswer, emailCode })
     const data = resp.data || resp
+    if (!data.token) {
+      throw new Error('注册失败：未返回有效凭证')
+    }
     authToken.value = data.token
     currentUser.value = data.user
     setToken(data.token)

@@ -51,7 +51,12 @@ async function request(path, options = {}) {
     const text = await res.text().catch(() => '')
     throw new Error(`HTTP ${res.status}: ${text || res.statusText}`)
   }
-  return res.json()
+  const data = await res.json()
+  // 检查业务错误码（go-zero 返回 {code, msg} 格式）
+  if (data != null && typeof data.code === 'number' && data.code !== 0 && data.msg) {
+    throw new Error(data.msg)
+  }
+  return data
 }
 
 /* ── 商品（消费者公开接口） ── */

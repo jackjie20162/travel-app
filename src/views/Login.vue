@@ -7,32 +7,31 @@
 
     <form class="auth-form" @submit.prevent="handleSubmit">
       <!-- 注册额外字段 -->
-      <div v-if="isRegister" class="form-group">
-        <label>昵称</label>
-        <input v-model="form.nickname" placeholder="可选" />
-      </div>
+      <template v-if="isRegister">
+        <div class="form-group">
+          <label>用户名</label>
+          <input v-model="form.username" placeholder="请输入用户名" required />
+        </div>
+        <div class="form-group">
+          <label>昵称</label>
+          <input v-model="form.nickname" placeholder="可选" />
+        </div>
+        <div class="form-group">
+          <label>密码</label>
+          <input v-model="form.password" type="password" placeholder="请设置密码" required />
+        </div>
+      </template>
 
       <div class="form-group">
-        <label>用户名</label>
-        <input v-model="form.username" placeholder="请输入用户名" required />
-      </div>
-
-      <div class="form-group">
-        <label>密码</label>
-        <input v-model="form.password" type="password" placeholder="请输入密码" required />
+        <label>邮箱</label>
+        <input v-model="form.email" type="email" placeholder="请输入邮箱" required />
       </div>
 
       <!-- 注册额外字段 -->
-      <template v-if="isRegister">
-        <div class="form-group">
-          <label>邮箱</label>
-          <input v-model="form.email" type="email" placeholder="请输入邮箱" required />
-        </div>
-        <div class="form-group">
-          <label>手机号</label>
-          <input v-model="form.mobile" type="tel" placeholder="可选" />
-        </div>
-      </template>
+      <div v-if="isRegister" class="form-group">
+        <label>手机号</label>
+        <input v-model="form.mobile" type="tel" placeholder="可选" />
+      </div>
 
       <!-- 图形验证码 -->
       <div class="form-group">
@@ -106,7 +105,6 @@ onMounted(() => {
   refreshCaptcha()
 })
 
-// 切换登录/注册时刷新验证码
 watch(isRegister, () => {
   refreshCaptcha()
 })
@@ -139,9 +137,7 @@ async function handleSendCode() {
       captchaId: form.captchaId,
       captchaAnswer: form.captchaAnswer,
     })
-    // 发送成功，开始倒计时
     startCooldown()
-    // 刷新图形验证码（一次性）
     refreshCaptcha()
     form.captchaAnswer = ''
   } catch (e) {
@@ -181,8 +177,7 @@ async function handleSubmit() {
       })
     } else {
       await login({
-        username: form.username,
-        password: form.password,
+        email: form.email,
         captchaId: form.captchaId,
         captchaAnswer: form.captchaAnswer,
         emailCode: form.emailCode,

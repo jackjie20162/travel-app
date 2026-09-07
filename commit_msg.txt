@@ -1,0 +1,5 @@
+refactor: 登录改为邮箱+验证码（无密码），注册保留用户名密码
+
+- api.js: login 参数改为 email
+- user.js: login 参数改为 email
+- Login.vue: 登录去掉密码字段，用户名改邮箱；注册保留用户名/密码/邮箱

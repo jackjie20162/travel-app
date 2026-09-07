@@ -24,8 +24,8 @@ export function useUser() {
   const nickname = computed(() => currentUser.value?.nickname || username.value)
   const avatar = computed(() => currentUser.value?.avatar || '')
 
-  async function login({ username, password, captchaId, captchaAnswer, emailCode }) {
-    const resp = await apiLogin({ username, password, captchaId, captchaAnswer, emailCode })
+  async function login({ email, captchaId, captchaAnswer, emailCode }) {
+    const resp = await apiLogin({ email, captchaId, captchaAnswer, emailCode })
     const data = resp.data || resp
     authToken.value = data.token
     currentUser.value = data.user

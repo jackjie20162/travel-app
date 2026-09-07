@@ -208,10 +208,10 @@ export function register({ username, password, email, mobile, nickname, captchaI
   })
 }
 
-export function login({ username, password, captchaId, captchaAnswer, emailCode }) {
+export function login({ email, captchaId, captchaAnswer, emailCode }) {
   return request('/api/travel/user/login', {
     method: 'POST',
-    body: JSON.stringify({ username, password, captchaId, captchaAnswer, emailCode }),
+    body: JSON.stringify({ email, captchaId, captchaAnswer, emailCode }),
   })
 }
 

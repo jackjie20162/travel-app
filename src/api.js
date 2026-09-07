@@ -188,17 +188,30 @@ export function setStoredUser(user) {
   localStorage.setItem(STORAGE_USER, JSON.stringify(user))
 }
 
-export function register({ username, password, email, mobile, nickname }) {
-  return request('/api/travel/user/register', {
+/** 获取图形验证码 */
+export function getCaptcha() {
+  return request('/api/travel/captcha')
+}
+
+/** 发送邮件验证码 */
+export function sendEmailCode({ email, captchaId, captchaAnswer }) {
+  return request('/api/travel/user/send-email-code', {
     method: 'POST',
-    body: JSON.stringify({ username, password, email, mobile, nickname }),
+    body: JSON.stringify({ email, captchaId, captchaAnswer }),
   })
 }
 
-export function login({ username, password }) {
+export function register({ username, password, email, mobile, nickname, captchaId, captchaAnswer, emailCode }) {
+  return request('/api/travel/user/register', {
+    method: 'POST',
+    body: JSON.stringify({ username, password, email, mobile, nickname, captchaId, captchaAnswer, emailCode }),
+  })
+}
+
+export function login({ username, password, captchaId, captchaAnswer, emailCode }) {
   return request('/api/travel/user/login', {
     method: 'POST',
-    body: JSON.stringify({ username, password }),
+    body: JSON.stringify({ username, password, captchaId, captchaAnswer, emailCode }),
   })
 }
 

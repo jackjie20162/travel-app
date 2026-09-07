@@ -10,6 +10,8 @@ import {
   register as apiRegister,
   getProfile as apiGetProfile,
   logout as apiLogout,
+  getCaptcha as apiGetCaptcha,
+  sendEmailCode as apiSendEmailCode,
 } from '../api.js'
 
 // 全局响应式状态（模块级单例，所有组件共享同一份）
@@ -22,8 +24,8 @@ export function useUser() {
   const nickname = computed(() => currentUser.value?.nickname || username.value)
   const avatar = computed(() => currentUser.value?.avatar || '')
 
-  async function login({ username, password }) {
-    const resp = await apiLogin({ username, password })
+  async function login({ username, password, captchaId, captchaAnswer, emailCode }) {
+    const resp = await apiLogin({ username, password, captchaId, captchaAnswer, emailCode })
     const data = resp.data || resp
     authToken.value = data.token
     currentUser.value = data.user
@@ -32,14 +34,22 @@ export function useUser() {
     return data
   }
 
-  async function register({ username, password, email, mobile, nickname }) {
-    const resp = await apiRegister({ username, password, email, mobile, nickname })
+  async function register({ username, password, email, mobile, nickname, captchaId, captchaAnswer, emailCode }) {
+    const resp = await apiRegister({ username, password, email, mobile, nickname, captchaId, captchaAnswer, emailCode })
     const data = resp.data || resp
     authToken.value = data.token
     currentUser.value = data.user
     setToken(data.token)
     setStoredUser(data.user)
     return data
+  }
+
+  async function fetchCaptcha() {
+    return apiGetCaptcha()
+  }
+
+  async function sendEmailCode(payload) {
+    return apiSendEmailCode(payload)
   }
 
   async function fetchProfile() {
@@ -75,5 +85,7 @@ export function useUser() {
     register,
     fetchProfile,
     logout,
+    fetchCaptcha,
+    sendEmailCode,
   }
 }

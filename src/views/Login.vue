@@ -26,13 +26,36 @@
       <template v-if="isRegister">
         <div class="form-group">
           <label>邮箱</label>
-          <input v-model="form.email" type="email" placeholder="可选" />
+          <input v-model="form.email" type="email" placeholder="请输入邮箱" required />
         </div>
         <div class="form-group">
           <label>手机号</label>
           <input v-model="form.mobile" type="tel" placeholder="可选" />
         </div>
       </template>
+
+      <!-- 图形验证码 -->
+      <div class="form-group">
+        <label>图形验证码</label>
+        <div class="captcha-row">
+          <input v-model="form.captchaAnswer" placeholder="请输入验证码" required />
+          <div class="captcha-img" @click="refreshCaptcha" title="点击刷新">
+            <img v-if="captchaImage" :src="'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(captchaImage)))" alt="captcha" />
+            <span v-else>点击获取</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- 邮件验证码 -->
+      <div class="form-group">
+        <label>邮件验证码</label>
+        <div class="captcha-row">
+          <input v-model="form.emailCode" placeholder="请输入邮件验证码" required />
+          <button type="button" class="btn-send-code" :disabled="codeCooldown > 0 || sendingCode" @click="handleSendCode">
+            {{ sendingCode ? '发送中…' : (codeCooldown > 0 ? `${codeCooldown}s` : '发送验证码') }}
+          </button>
+        </div>
+      </div>
 
       <div v-if="error" class="auth-error">{{ error }}</div>
 
@@ -51,17 +74,20 @@
 </template>
 
 <script setup>
-import { ref, reactive } from 'vue'
+import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUser } from '../composables/user.js'
 
 const router = useRouter()
 const route = useRoute()
-const { login, register } = useUser()
+const { login, register, fetchCaptcha, sendEmailCode } = useUser()
 
 const isRegister = ref(route.query.mode === 'register')
 const loading = ref(false)
 const error = ref('')
+const sendingCode = ref(false)
+const codeCooldown = ref(0)
+let cooldownTimer = null
 
 const form = reactive({
   username: '',
@@ -69,7 +95,74 @@ const form = reactive({
   email: '',
   mobile: '',
   nickname: '',
+  captchaId: '',
+  captchaAnswer: '',
+  emailCode: '',
 })
+
+const captchaImage = ref('')
+
+onMounted(() => {
+  refreshCaptcha()
+})
+
+// 切换登录/注册时刷新验证码
+watch(isRegister, () => {
+  refreshCaptcha()
+})
+
+async function refreshCaptcha() {
+  try {
+    const data = await fetchCaptcha()
+    form.captchaId = data.captchaId
+    captchaImage.value = data.captchaImage
+  } catch (e) {
+    error.value = '获取验证码失败'
+  }
+}
+
+async function handleSendCode() {
+  error.value = ''
+  const email = form.email
+  if (!email) {
+    error.value = '请先输入邮箱地址'
+    return
+  }
+  if (!form.captchaId || !form.captchaAnswer) {
+    error.value = '请先输入图形验证码'
+    return
+  }
+  sendingCode.value = true
+  try {
+    await sendEmailCode({
+      email,
+      captchaId: form.captchaId,
+      captchaAnswer: form.captchaAnswer,
+    })
+    // 发送成功，开始倒计时
+    startCooldown()
+    // 刷新图形验证码（一次性）
+    refreshCaptcha()
+    form.captchaAnswer = ''
+  } catch (e) {
+    error.value = e.message || '发送验证码失败'
+    refreshCaptcha()
+    form.captchaAnswer = ''
+  } finally {
+    sendingCode.value = false
+  }
+}
+
+function startCooldown() {
+  codeCooldown.value = 60
+  cooldownTimer = setInterval(() => {
+    codeCooldown.value--
+    if (codeCooldown.value <= 0) {
+      clearInterval(cooldownTimer)
+      cooldownTimer = null
+    }
+  }, 1000)
+}
 
 async function handleSubmit() {
   error.value = ''
@@ -82,15 +175,25 @@ async function handleSubmit() {
         email: form.email,
         mobile: form.mobile,
         nickname: form.nickname,
+        captchaId: form.captchaId,
+        captchaAnswer: form.captchaAnswer,
+        emailCode: form.emailCode,
       })
     } else {
-      await login({ username: form.username, password: form.password })
+      await login({
+        username: form.username,
+        password: form.password,
+        captchaId: form.captchaId,
+        captchaAnswer: form.captchaAnswer,
+        emailCode: form.emailCode,
+      })
     }
-    // Redirect to the page user came from, or profile
     const redirect = route.query.redirect || '/profile'
     router.replace(redirect)
   } catch (e) {
     error.value = e.message || '操作失败，请重试'
+    refreshCaptcha()
+    form.captchaAnswer = ''
   } finally {
     loading.value = false
   }
@@ -135,6 +238,59 @@ async function handleSubmit() {
 }
 .form-group input:focus {
   border-color: #1a1a2e;
+}
+.captcha-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.captcha-row input {
+  flex: 1;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 15px;
+  outline: none;
+}
+.captcha-img {
+  width: 110px;
+  height: 40px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #f8fafc;
+  flex-shrink: 0;
+}
+.captcha-img img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.captcha-img span {
+  font-size: 12px;
+  color: #94a3b8;
+}
+.btn-send-code {
+  padding: 10px 14px;
+  border: 1px solid #2563eb;
+  border-radius: 10px;
+  background: white;
+  color: #2563eb;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.btn-send-code:disabled {
+  border-color: #cbd5e1;
+  color: #94a3b8;
+  cursor: not-allowed;
 }
 .auth-error {
   background: #fef2f2;

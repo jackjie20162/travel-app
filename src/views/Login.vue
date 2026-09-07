@@ -39,7 +39,7 @@
         <div class="captcha-row">
           <input v-model="form.captchaAnswer" placeholder="请输入验证码" required />
           <div class="captcha-img" @click="refreshCaptcha" title="点击刷新">
-            <img v-if="captchaImage" :src="'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(captchaImage)))" alt="captcha" />
+            <img v-if="captchaSrc" :src="captchaSrc" alt="captcha" />
             <span v-else>点击获取</span>
           </div>
         </div>
@@ -99,7 +99,7 @@ const form = reactive({
   emailCode: '',
 })
 
-const captchaImage = ref('')
+const captchaSrc = ref('')
 
 onMounted(() => {
   refreshCaptcha()
@@ -113,9 +113,13 @@ async function refreshCaptcha() {
   try {
     const data = await fetchCaptcha()
     form.captchaId = data.captchaId
-    captchaImage.value = data.captchaImage
+    // 用 TextEncoder 正确编码 SVG 为 base64
+    const bytes = new TextEncoder().encode(data.captchaImage)
+    const base64 = btoa(String.fromCharCode(...bytes))
+    captchaSrc.value = 'data:image/svg+xml;base64,' + base64
   } catch (e) {
     error.value = '获取验证码失败'
+    captchaSrc.value = ''
   }
 }
 

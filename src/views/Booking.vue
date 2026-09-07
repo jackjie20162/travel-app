@@ -521,7 +521,7 @@ function increaseQty() {
   if (qty.value < maxQty.value) qty.value++
 }
 
-/** 添加一位游客（无上限） */
+/** 添加一位游客（无上限，不允许重复） */
 function addTraveler() {
   travelers.value.push(emptyTraveler())
 }
@@ -577,6 +577,14 @@ function openContactsModal() {
 }
 
 function selectSavedTraveler(st) {
+  // 检查是否已存在相同出行人（按姓名+证件号判断）
+  const duplicate = travelers.value.find(
+    t => t.name.trim() && t.name === st.name && t.idNumber === st.idNumber
+  )
+  if (duplicate) {
+    error.value = `出行人「${st.name}」已在列表中，请勿重复添加`
+    return
+  }
   if (travelers.value.length === 1 && !travelers.value[0].name) {
     Object.assign(travelers.value[0], { ...st })
   } else {

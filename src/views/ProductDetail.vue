@@ -136,6 +136,48 @@
         </div>
       </div>
 
+      <!-- 行程 -->
+      <div v-if="itineraryStops.length" class="detail-itinerary-section">
+        <div class="itinerary-header">
+          <h2>行程</h2>
+          <span class="itinerary-count">共{{ itineraryStops.length }}个节点</span>
+        </div>
+        <div class="itinerary-timeline">
+          <div v-for="(stop, i) in itineraryStops" :key="stop.id || i" class="itinerary-item">
+            <div class="itinerary-rail">
+              <span class="itinerary-dot">{{ stopIcon(stop.stopType) }}</span>
+              <span v-if="i < itineraryStops.length - 1" class="itinerary-line"></span>
+            </div>
+            <div class="itinerary-body">
+              <div class="itinerary-title-row">
+                <span class="itinerary-type">{{ stopTypeLabel(stop.stopType) }}</span>
+                <span class="itinerary-title">{{ stopTitle(stop) }}</span>
+              </div>
+              <div v-if="stopMeta(stop).length" class="itinerary-meta">
+                <span v-for="(m, mi) in stopMeta(stop)" :key="mi" class="itinerary-meta-item">{{ m }}</span>
+              </div>
+              <p v-if="stopDesc(stop)" class="itinerary-desc">{{ stopDesc(stop) }}</p>
+              <div v-if="stopImages(stop).length" class="itinerary-images">
+                <img v-for="(img, ii) in stopImages(stop)" :key="ii" :src="img" alt=""/>
+              </div>
+              <div v-if="stop.stopType === 'RETURN'" class="itinerary-return">
+                <div v-if="stop.tp.dropoffService" class="return-block">
+                  <div class="return-label">提供送回服务</div>
+                  <div v-for="(r, ri) in stop.tp.dropoffPoints" :key="'d'+ri" class="return-line">{{ r.time }} · {{ r.city }}送回</div>
+                </div>
+                <div v-if="stop.tp.dispersalService" class="return-block">
+                  <div class="return-label">返回解散点解散</div>
+                  <div v-for="(r, ri) in stop.tp.dispersalPoints" :key="'s'+ri" class="return-line">{{ r.time }} · {{ r.city }} · {{ r.pointName }}</div>
+                </div>
+                <div v-if="stop.tp.freeDispersal" class="return-block">
+                  <div class="return-label">自由解散</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- 9. 产品描述 -->
       <div v-if="product.description" class="detail-desc-section">
         <h2>详情</h2>
@@ -316,7 +358,7 @@
 <script setup>
 import { ref, computed, onMounted, watch, nextTick } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { getProductDetail, getProductPackages, checkInventory, batchInventory, getProductReviews } from '../api.js'
+import { getProductDetail, getProductPackages, checkInventory, batchInventory, getProductReviews, getProductItineraryStops } from '../api.js'
 import { useFavorites } from '../composables/favorites.js'
 import { useUser } from '../composables/user.js'
 
@@ -348,6 +390,9 @@ const monthlySales = ref(79)
 const reviews = ref([])
 const reviewTotal = ref(0)
 const avgRating = ref(0)
+
+// 行程节点（C 端展示）
+const itineraryStops = ref([])
 
 // 日历状态
 const calYear = ref(new Date().getFullYear())
@@ -623,6 +668,8 @@ async function loadProduct() {
     if (activePackages.value.length === 1) {
       selectPkg(activePackages.value[0])
     }
+    // Load itinerary stops
+    loadItinerary()
     // Load reviews
     loadReviews()
   } catch (e) {
@@ -641,6 +688,101 @@ async function loadReviews() {
   } catch (e) {
     console.error('加载评价失败', e)
   }
+}
+
+// ── 行程展示 ──
+const stopTypeLabels = { MEETING: '集合', ACTIVITY: '地点和活动', TRANSPORT: '行中交通', MEAL: '行中餐食', RETURN: '返程' }
+const stopTypeIcons = { MEETING: '🚩', ACTIVITY: '📍', TRANSPORT: '🚌', MEAL: '🍽️', RETURN: '🏁' }
+const mealLabels = { BREAKFAST: '早餐', LUNCH: '午餐', DINNER: '晚餐', AFTERNOON_TEA: '下午茶', MIDNIGHT_SNACK: '夜宵', MORNING_TEA: '早茶' }
+
+function parseTp(raw) {
+  if (!raw) return {}
+  try {
+    return typeof raw === 'string' ? JSON.parse(raw) : raw
+  } catch {
+    return {}
+  }
+}
+
+async function loadItinerary() {
+  try {
+    const resp = await getProductItineraryStops(route.params.id)
+    itineraryStops.value = (resp.items || []).map(s => ({ ...s, tp: parseTp(s.typeParams) }))
+  } catch (e) {
+    console.error('加载行程失败', e)
+  }
+}
+
+function stopTypeLabel(t) {
+  return stopTypeLabels[t] || t
+}
+
+function stopIcon(t) {
+  return stopTypeIcons[t] || '•'
+}
+
+function fmtDuration(h, m) {
+  const parts = []
+  if (h) parts.push(`${h}小时`)
+  if (m) parts.push(`${m}分钟`)
+  return parts.join('')
+}
+
+function stopTitle(stop) {
+  const tp = stop.tp || {}
+  switch (stop.stopType) {
+    case 'MEETING':
+      if (tp.meetingMode === 'POINT') return tp.meetingPoint || '集合点集合'
+      return tp.pickupCity ? `${tp.pickupCity}上门接` : '上门接'
+    case 'ACTIVITY':
+      return stop.poiName || stop.title || '地点和活动'
+    case 'TRANSPORT':
+      return stop.transportType ? `${stop.transportType}出行` : (stop.title || '行中交通')
+    case 'MEAL':
+      return mealLabels[tp.mealType] || stop.title || '行中餐食'
+    default:
+      return stop.title || '返程'
+  }
+}
+
+function stopMeta(stop) {
+  const tp = stop.tp || {}
+  const meta = []
+  if (stop.stopType === 'MEETING') {
+    if (tp.meetingMode === 'POINT') {
+      if (tp.meetingTime) meta.push(`${tp.meetingTime} 集合`)
+      if (tp.meetingCity) meta.push(tp.meetingCity)
+    } else {
+      if (tp.pickupTime) meta.push(`${tp.pickupTime} 接站`)
+      if (tp.pickupCity) meta.push(tp.pickupCity)
+      if (tp.pickupDistrict) meta.push(tp.pickupDistrict)
+    }
+  } else if (stop.stopType === 'ACTIVITY') {
+    meta.push(stop.isEntering === false ? '不入内' : '入内参观')
+    const d = fmtDuration(stop.durationHours, stop.durationMinutes)
+    if (d) meta.push(`体验${d}`)
+  } else if (stop.stopType === 'TRANSPORT') {
+    const d = fmtDuration(stop.durationHours, stop.durationMinutes)
+    if (d) meta.push(`车程${d}`)
+  } else if (stop.stopType === 'MEAL') {
+    const d = fmtDuration(stop.durationHours, stop.durationMinutes)
+    if (d) meta.push(`用餐${d}`)
+  }
+  return meta
+}
+
+function stopDesc(stop) {
+  const tp = stop.tp || {}
+  if (stop.stopType === 'MEETING') {
+    return tp.meetingMode === 'POINT' ? (tp.meetingDesc || '') : (tp.pickupNote || '')
+  }
+  return stop.activityFeatures || ''
+}
+
+function stopImages(stop) {
+  const tp = stop.tp || {}
+  const raw = stop.stopType === 'MEETING' ? (tp.meetingImages || '') : ''
+  return raw.split(',').map(s => s.trim()).filter(Boolean)
 }
 
 function scrollToReviews() {
@@ -677,6 +819,124 @@ onMounted(loadProduct)
 </script>
 
 <style scoped>
+.detail-itinerary-section {
+  padding: 16px;
+}
+.itinerary-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+.itinerary-header h2 {
+  font-size: 17px;
+  margin: 0;
+}
+.itinerary-count {
+  font-size: 12px;
+  color: #999;
+}
+.itinerary-item {
+  display: flex;
+  gap: 10px;
+}
+.itinerary-rail {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 26px;
+  flex-shrink: 0;
+}
+.itinerary-dot {
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: #f2f6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+}
+.itinerary-line {
+  flex: 1;
+  width: 2px;
+  background: #e5e7eb;
+  margin: 4px 0;
+}
+.itinerary-body {
+  flex: 1;
+  background: #fff;
+  border-radius: 10px;
+  padding: 10px 12px;
+  margin-bottom: 10px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+.itinerary-title-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.itinerary-type {
+  font-size: 11px;
+  color: #2563eb;
+  background: #eff6ff;
+  border-radius: 4px;
+  padding: 2px 6px;
+  flex-shrink: 0;
+}
+.itinerary-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: #333;
+}
+.itinerary-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 6px;
+}
+.itinerary-meta-item {
+  font-size: 12px;
+  color: #666;
+  background: #f5f6f8;
+  border-radius: 4px;
+  padding: 2px 6px;
+}
+.itinerary-desc {
+  font-size: 13px;
+  color: #555;
+  line-height: 1.5;
+  margin: 6px 0 0;
+}
+.itinerary-images {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-top: 8px;
+}
+.itinerary-images img {
+  width: 72px;
+  height: 72px;
+  border-radius: 6px;
+  object-fit: cover;
+}
+.itinerary-return {
+  margin-top: 8px;
+}
+.return-block {
+  margin-bottom: 6px;
+}
+.return-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #6b21a8;
+  margin-bottom: 2px;
+}
+.return-line {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.6;
+}
 .detail-reviews-section {
   padding: 16px;
 }

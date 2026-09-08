@@ -79,6 +79,11 @@ export function getProductPackages(productId) {
   return request(`/api/travel/products/${productId}/packages`)
 }
 
+/** C 端公开：产品行程节点列表（按 sequence 排序） */
+export function getProductItineraryStops(productId) {
+  return request(`/api/travel/products/${productId}/itinerary-stops`)
+}
+
 /* ── 库存 ── */
 
 export function checkInventory({ packageId, date, timeSlot, quantity }) {

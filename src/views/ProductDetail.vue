@@ -558,7 +558,6 @@ function calPrevMonth() {
   } else {
     calMonth.value--
   }
-  loadMonthInventory()
 }
 
 function goNextMonth() {
@@ -568,17 +567,16 @@ function goNextMonth() {
   } else {
     calMonth.value++
   }
-  loadMonthInventory()
 }
 
-// 加载某月的库存数据
-async function loadMonthInventory() {
+// 加载可订窗口（当天至当天+30天）的库存数据
+async function loadInventoryWindow() {
   if (!selectedPkg.value) return
-  const year = calYear.value
-  const month = calMonth.value
-  const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-  const lastDay = new Date(year, month, 0).getDate()
-  const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
+  const start = new Date()
+  const end = new Date()
+  end.setDate(start.getDate() + 30)
+  const startDate = start.toISOString().split('T')[0]
+  const endDate = end.toISOString().split('T')[0]
 
   try {
     const resp = await batchInventory({
@@ -602,7 +600,7 @@ async function loadMonthInventory() {
       }
     }
   } catch (e) {
-    console.error('加载月度库存失败', e)
+    console.error('加载可订窗口库存失败', e)
   }
 }
 
@@ -611,8 +609,8 @@ function selectPkg(pkg) {
   selectedDate.value = ''
   selectedInventory.value = null
   inventoryCache.value = {}
-  // 重新加载当前月份库存
-  loadMonthInventory()
+  // 重新加载可订窗口库存
+  loadInventoryWindow()
   // 滚动日期条
   nextTick(() => {
     if (dateStripRef.value) {
@@ -671,7 +669,7 @@ function openCalendar() {
   }
   showCalendar.value = true
   if (selectedPkg.value && Object.keys(inventoryCache.value).length === 0) {
-    loadMonthInventory()
+    loadInventoryWindow()
   }
 }
 

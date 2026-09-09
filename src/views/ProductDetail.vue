@@ -171,7 +171,15 @@
               <div v-if="stop.stopType === 'RETURN'" class="itinerary-return">
                 <div v-if="stop.tp.dropoffService" class="return-block">
                   <div class="return-label">提供送回服务</div>
-                  <div v-for="(r, ri) in stop.tp.dropoffPoints" :key="'d'+ri" class="return-line">{{ r.time }} · {{ r.city }}送回</div>
+                  <div v-for="(r, ri) in stop.tp.dropoffPoints" :key="'d'+ri" class="return-dropoff">
+                    <div class="return-line">{{ r.time }} · {{ r.city }}送回</div>
+                    <div class="range-tags">
+                      <span class="range-tag">{{ pickupRangeModeLabel(r) }}</span>
+                      <span v-for="opt in pickupRangeOptionLabels(r)" :key="opt" class="range-tag">{{ opt }}</span>
+                    </div>
+                    <PickupRangeMap v-if="pickupPolygon(r).length >= 3" :polygon="pickupPolygon(r)" />
+                    <p v-if="r.note" class="return-note">{{ r.note }}</p>
+                  </div>
                 </div>
                 <div v-if="stop.tp.dispersalService" class="return-block">
                   <div class="return-label">返回解散点解散</div>
@@ -800,17 +808,22 @@ function isPickupMeeting(stop) {
 }
 
 function pickupPolygon(tp) {
-  const raw = (tp || {}).pickupPolygon
+  const t = tp || {}
+  // 集合节点存 pickupPolygon，返程送回行存 polygon
+  const raw = Array.isArray(t.polygon) ? t.polygon : t.pickupPolygon
   if (!Array.isArray(raw)) return []
   return raw.filter(p => Array.isArray(p) ? p.length >= 2 : (p && p.lng != null && p.lat != null))
 }
 
 function pickupRangeModeLabel(tp) {
-  return (tp || {}).pickupRangeMode === 'PARTIAL' ? '仅列表部分酒店/地点' : '自定义接送范围'
+  const t = tp || {}
+  const mode = t.pickupRangeMode || t.rangeMode
+  return mode === 'PARTIAL' ? '仅列表部分酒店/地点' : '自定义接送范围'
 }
 
 function pickupRangeOptionLabels(tp) {
-  const opts = (tp || {}).pickupRangeOptions || {}
+  const t = tp || {}
+  const opts = t.pickupRangeOptions || t.rangeOptions || {}
   const labels = []
   if (opts.drawAllAreas) labels.push('覆盖范围内所有区域')
   if (opts.drawAllHotels) labels.push('覆盖范围内所有酒店')
@@ -994,6 +1007,17 @@ onMounted(loadProduct)
   font-size: 12px;
   color: #666;
   line-height: 1.6;
+}
+.return-dropoff {
+  margin-bottom: 8px;
+}
+.return-dropoff .range-tags {
+  margin-top: 2px;
+}
+.return-note {
+  font-size: 12px;
+  color: #666;
+  margin: 4px 0 0;
 }
 .detail-reviews-section {
   padding: 16px;

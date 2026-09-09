@@ -160,6 +160,14 @@
               <div v-if="stopImages(stop).length" class="itinerary-images">
                 <img v-for="(img, ii) in stopImages(stop)" :key="ii" :src="img" alt=""/>
               </div>
+              <div v-if="isPickupMeeting(stop)" class="itinerary-pickup-range">
+                <div class="range-label">接送范围</div>
+                <div class="range-tags">
+                  <span class="range-tag">{{ pickupRangeModeLabel(stop.tp) }}</span>
+                  <span v-for="opt in pickupRangeOptionLabels(stop.tp)" :key="opt" class="range-tag">{{ opt }}</span>
+                </div>
+                <PickupRangeMap v-if="pickupPolygon(stop.tp).length >= 3" :polygon="pickupPolygon(stop.tp)" />
+              </div>
               <div v-if="stop.stopType === 'RETURN'" class="itinerary-return">
                 <div v-if="stop.tp.dropoffService" class="return-block">
                   <div class="return-label">提供送回服务</div>
@@ -361,6 +369,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { getProductDetail, getProductPackages, checkInventory, batchInventory, getProductReviews, getProductItineraryStops } from '../api.js'
 import { useFavorites } from '../composables/favorites.js'
 import { useUser } from '../composables/user.js'
+import PickupRangeMap from '../components/PickupRangeMap.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -785,6 +794,31 @@ function stopImages(stop) {
   return raw.split(',').map(s => s.trim()).filter(Boolean)
 }
 
+// 上门接集合节点：展示接送范围
+function isPickupMeeting(stop) {
+  return stop.stopType === 'MEETING' && (stop.tp || {}).meetingMode !== 'POINT'
+}
+
+function pickupPolygon(tp) {
+  const raw = (tp || {}).pickupPolygon
+  if (!Array.isArray(raw)) return []
+  return raw.filter(p => Array.isArray(p) ? p.length >= 2 : (p && p.lng != null && p.lat != null))
+}
+
+function pickupRangeModeLabel(tp) {
+  return (tp || {}).pickupRangeMode === 'PARTIAL' ? '仅列表部分酒店/地点' : '自定义接送范围'
+}
+
+function pickupRangeOptionLabels(tp) {
+  const opts = (tp || {}).pickupRangeOptions || {}
+  const labels = []
+  if (opts.drawAllAreas) labels.push('覆盖范围内所有区域')
+  if (opts.drawAllHotels) labels.push('覆盖范围内所有酒店')
+  if (opts.drawAllStations) labels.push('覆盖所有机场/火车站')
+  if (opts.extraCharge) labels.push('超范围可付费接送')
+  return labels
+}
+
 function scrollToReviews() {
   if (reviewsSection.value) {
     reviewsSection.value.scrollIntoView({ behavior: 'smooth' })
@@ -919,6 +953,30 @@ onMounted(loadProduct)
   height: 72px;
   border-radius: 6px;
   object-fit: cover;
+}
+.itinerary-pickup-range {
+  margin-top: 8px;
+  background: #f8fafc;
+  border-radius: 8px;
+  padding: 8px 10px;
+}
+.range-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: #2563eb;
+  margin-bottom: 4px;
+}
+.range-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.range-tag {
+  font-size: 11px;
+  color: #475569;
+  background: #eff6ff;
+  border-radius: 4px;
+  padding: 2px 6px;
 }
 .itinerary-return {
   margin-top: 8px;

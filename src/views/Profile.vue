@@ -43,6 +43,11 @@
         <span>我的收藏</span>
         <span class="arrow">›</span>
       </div>
+      <div class="menu-item" @click="router.push('/support')">
+        <span class="menu-icon">💬</span>
+        <span>联系客服</span>
+        <span class="arrow">›</span>
+      </div>
       <div v-if="user.isLoggedIn" class="menu-item" @click="showEditProfile = true">
         <span class="menu-icon">✎</span>
         <span>编辑资料</span>

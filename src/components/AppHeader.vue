@@ -5,7 +5,7 @@
       <b>GLOBAL DUBAI</b>
     </div>
     <div class="header-actions">
-      <button class="icon-btn locale-btn" @click="showLocaleMenu = !showLocaleMenu" :title="t('profile.language')">
+      <button class="icon-btn locale-btn" @click.stop="showLocaleMenu = !showLocaleMenu" :title="t('profile.language')">
         🌐
       </button>
       <button v-if="showFav" class="icon-btn" @click="router.push(user.isLoggedIn.value ? '/profile' : '/login')">

@@ -121,8 +121,6 @@ const previewUrl = ref('')
 let pendingLoadMore = false
 let productCardSent = false
 let client = null
-// 乐观消息序号基数：取当前毫秒，远大于服务端会话 seq，保证本地消息稳定排在历史之后
-let optimisticSeq = Date.now()
 
 const connected = computed(() => status.value === 'online')
 const statusText = computed(
@@ -221,6 +219,14 @@ function onLoadMore() {
   loadHistory(session.value.sessionId, messages.value[0].seq)
 }
 
+// 乐观消息序号：在当前会话最大 seq 上递增，使新发消息按序排在已有消息之后；
+// 若与在途收到消息的服务端 seq 撞号，dedupMerge 会回退比较发送时间，仍保证时间顺序
+function nextOptimisticSeq() {
+  let max = 0
+  for (const m of messages.value) if (m.seq > max) max = m.seq
+  return max + 1
+}
+
 // 统一发送入口：寻址（已绑定会话用 im_uid，否则用商户业务身份）+ 乐观追加
 function sendChatMessage(content, contentType) {
   if (!connected.value) return
@@ -238,7 +244,7 @@ function sendChatMessage(content, contentType) {
       toUid: session.value?.peerImUid || '',
       content,
       contentType,
-      seq: optimisticSeq++,
+      seq: nextOptimisticSeq(),
       time: Date.now(),
     },
   ])

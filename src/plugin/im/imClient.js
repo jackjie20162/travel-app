@@ -21,6 +21,7 @@ export function normalizeMessage(raw) {
     fromUid: raw.from ?? raw.from_user_id ?? 0,
     toUid: raw.to ?? raw.to_user_id ?? 0,
     content: raw.content || '',
+    contentType: raw.content_type || 1,
     seq: raw.seq || 0,
     time: raw.time || raw.create_time || 0,
     fromType: raw.from_type || 0,
@@ -88,8 +89,9 @@ export class ImClient {
   }
 
   // 发送聊天：to 为对端 im_uid；或用 toType+toBizUid 由网关懒注册解析。
-  sendChat({ to = 0, toType = 0, toBizUid = 0, content = '' }) {
-    return this._send({ cmd: CMD.CHAT, to, to_type: toType, to_biz_uid: toBizUid, content })
+  // contentType：1文本 2图片 3商品卡片，默认文本。
+  sendChat({ to = 0, toType = 0, toBizUid = 0, content = '', contentType = 1 }) {
+    return this._send({ cmd: CMD.CHAT, to, to_type: toType, to_biz_uid: toBizUid, content, content_type: contentType })
   }
 
   loadSessions() {

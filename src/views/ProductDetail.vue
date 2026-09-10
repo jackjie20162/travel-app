@@ -250,7 +250,7 @@
           </div>
         </div>
         <div class="action-buttons">
-          <button class="btn-service">问客服</button>
+          <button class="btn-service" @click="goSupport">问客服</button>
           <button class="btn-book-v2" :disabled="!canBook" @click="openBookingModal">立即预订</button>
         </div>
       </div>
@@ -858,6 +858,15 @@ function goBooking() {
     query.inventoryId = selectedInventory.value.id
   }
   router.push({ name: 'Booking', query })
+}
+
+// 问客服：携带当前商品进入客服会话，商户可直接看到咨询商品
+function goSupport() {
+  if (!user.isLoggedIn.value) {
+    router.push({ name: 'Login', query: { redirect: route.fullPath } })
+    return
+  }
+  router.push({ path: '/support', query: { productId: product.value.id } })
 }
 
 onMounted(loadProduct)

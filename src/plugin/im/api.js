@@ -46,5 +46,50 @@ export function normalizeSession(s) {
     lastSeq: s.last_seq || 0,
     lastTime: s.last_time || 0,
     unread: s.unread || 0,
+    lastContentType: s.last_content_type || 1,
+  }
+}
+
+// IM 内容类型（与 im-common/constant ContentType 保持一致）
+export const CONTENT_TYPE = { TEXT: 1, IMAGE: 2, PRODUCT: 3 }
+
+// IM 网关 HTTP 基址：优先 VITE_IM_API_URL，否则从 WS 基址推导（ws->http，去掉 /ws）
+export function getImHttpBase() {
+  if (import.meta.env.VITE_IM_API_URL) {
+    return String(import.meta.env.VITE_IM_API_URL).replace(/\/$/, '')
+  }
+  return getImWsBase().replace(/^ws/, 'http').replace(/\/ws\/?$/, '')
+}
+
+// 上传图片到 IM 网关，返回可访问 URL
+export async function uploadImage(file) {
+  const fd = new FormData()
+  fd.append('file', file)
+  const resp = await fetch(`${getImHttpBase()}/im/upload`, { method: 'POST', body: fd })
+  if (!resp.ok) throw new Error('图片上传失败')
+  const json = await resp.json()
+  if (json.code !== 0) throw new Error(json.msg || '图片上传失败')
+  return json.data.url
+}
+
+// 构造商品卡片消息 content（JSON 字符串）
+export function buildProductContent(p) {
+  const cover = p.coverImage || (p.images ? String(p.images).split(',')[0].trim() : '') || ''
+  return JSON.stringify({
+    productId: p.id,
+    name: p.title || p.name || '',
+    cover,
+    price: p.minPrice != null ? String(p.minPrice) : '',
+    destination: p.destination || '',
+  })
+}
+
+// 解析商品卡片消息 content，失败返回 null
+export function parseProductContent(content) {
+  try {
+    const o = JSON.parse(content)
+    return o && typeof o === 'object' ? o : null
+  } catch {
+    return null
   }
 }

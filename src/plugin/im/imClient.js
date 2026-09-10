@@ -13,13 +13,14 @@ export const CMD = {
   HISTORY: 'history',
 }
 
-// 归一化消息：push(WsMsg) 用 from/to/time；history(ImMessageInfo) 用 from_user_id/to_user_id/create_time。
+// 归一化消息：push(WsMsg) 用 from/to/time；history(WsMsgItem) 用 from_user_id/to_user_id/create_time。
+// im_uid 协议中为字符串（防 JS 精度丢失），统一归一为 string。
 export function normalizeMessage(raw) {
   return {
     msgId: raw.msg_id || '',
     sessionId: raw.session_id || '',
-    fromUid: raw.from ?? raw.from_user_id ?? 0,
-    toUid: raw.to ?? raw.to_user_id ?? 0,
+    fromUid: String(raw.from || raw.from_user_id || ''),
+    toUid: String(raw.to || raw.to_user_id || ''),
     content: raw.content || '',
     contentType: raw.content_type || 1,
     seq: raw.seq || 0,
@@ -88,10 +89,12 @@ export class ImClient {
     return !!this.ws && this.ws.readyState === WebSocket.OPEN
   }
 
-  // 发送聊天：to 为对端 im_uid；或用 toType+toBizUid 由网关懒注册解析。
+  // 发送聊天：to 为对端 im_uid（字符串）；或用 toType+toBizUid 由网关懒注册解析。
   // contentType：1文本 2图片 3商品卡片，默认文本。
-  sendChat({ to = 0, toType = 0, toBizUid = 0, content = '', contentType = 1 }) {
-    return this._send({ cmd: CMD.CHAT, to, to_type: toType, to_biz_uid: toBizUid, content, content_type: contentType })
+  sendChat({ to = '', toType = 0, toBizUid = 0, content = '', contentType = 1 }) {
+    const payload = { cmd: CMD.CHAT, to_type: toType, to_biz_uid: toBizUid, content, content_type: contentType }
+    if (to) payload.to = String(to)
+    return this._send(payload)
   }
 
   loadSessions() {

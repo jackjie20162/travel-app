@@ -234,8 +234,8 @@ function sendChatMessage(content, contentType) {
     {
       msgId: '',
       sessionId: session.value?.sessionId || '',
-      fromUid: 0,
-      toUid: session.value?.peerImUid || 0,
+      fromUid: '',
+      toUid: session.value?.peerImUid || '',
       content,
       contentType,
       seq: optimisticSeq++,
@@ -276,7 +276,7 @@ async function onPickImage(e) {
   }
 }
 
-// 对端 im_uid 之外即为本人发出（含本地乐观消息 fromUid=0）
+// 对端 im_uid 之外即为本人发出（含本地乐观消息 fromUid 空串）
 function isOutgoing(m) {
   return !session.value || m.fromUid !== session.value.peerImUid
 }

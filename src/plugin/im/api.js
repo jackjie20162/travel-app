@@ -39,7 +39,7 @@ export function buildImWsUrl() {
 export function normalizeSession(s) {
   return {
     sessionId: s.session_id,
-    peerImUid: s.peer_im_uid,
+    peerImUid: String(s.peer_im_uid || ''),
     peerType: s.peer_type,
     peerBizUid: s.peer_biz_uid,
     lastContent: s.last_content || '',

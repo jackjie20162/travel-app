@@ -1,31 +1,31 @@
 <template>
   <div class="page-review-form">
-    <div v-if="loading" class="center" style="padding-top:80px">加载中…</div>
-    <div v-else-if="!order" class="center empty">订单不存在</div>
+    <div v-if="loading" class="center" style="padding-top:80px">{{ t('review.loading') }}</div>
+    <div v-else-if="!order" class="center empty">{{ t('review.notFound') }}</div>
     <template v-else>
       <!-- 头部：订单信息 -->
       <div class="review-header">
-        <h2>发表评价</h2>
-        <p class="order-info">{{ order.productName || order.productTitle || '旅游产品' }}</p>
+        <h2>{{ t('review.title') }}</h2>
+        <p class="order-info">{{ order.productName || order.productTitle || t('review.defaultProduct') }}</p>
         <p class="order-no mono">{{ order.orderNo }}</p>
       </div>
 
       <!-- 评分区 -->
       <div class="rating-section">
         <div class="rating-row">
-          <span class="rating-label">总体评分</span>
+          <span class="rating-label">{{ t('review.overallRating') }}</span>
           <div class="stars">
             <span v-for="n in 5" :key="'t'+n" class="star" :class="{ active: form.rating >= n }" @click="form.rating = n">★</span>
           </div>
         </div>
         <div class="rating-row">
-          <span class="rating-label">服务评分</span>
+          <span class="rating-label">{{ t('review.serviceRating') }}</span>
           <div class="stars">
             <span v-for="n in 5" :key="'s'+n" class="star" :class="{ active: form.serviceRating >= n }" @click="form.serviceRating = n">★</span>
           </div>
         </div>
         <div class="rating-row">
-          <span class="rating-label">性价比</span>
+          <span class="rating-label">{{ t('review.valueRating') }}</span>
           <div class="stars">
             <span v-for="n in 5" :key="'v'+n" class="star" :class="{ active: form.valueRating >= n }" @click="form.valueRating = n">★</span>
           </div>
@@ -34,13 +34,13 @@
 
       <!-- 评价内容 -->
       <div class="content-section">
-        <textarea v-model="form.content" placeholder="分享您的体验，帮助其他旅行者做出更好的选择…" rows="5" maxlength="500"></textarea>
+        <textarea v-model="form.content" :placeholder="t('review.contentPh')" rows="5" maxlength="500"></textarea>
         <div class="char-count">{{ (form.content || '').length }}/500</div>
       </div>
 
       <!-- 图片上传（简化版） -->
       <div class="images-section">
-        <h3>上传图片 <small>（可选，最多3张）</small></h3>
+        <h3>{{ t('review.uploadImages') }} <small>{{ t('review.optionalMax3') }}</small></h3>
         <div class="image-upload-area">
           <div v-for="(img, i) in previewImages" :key="i" class="preview-img">
             <img :src="img" alt=""/>
@@ -56,7 +56,7 @@
       <!-- 提交按钮 -->
       <div class="submit-area">
         <button class="btn-submit" :disabled="submitting || form.rating < 1" @click="submitReview">
-          {{ submitting ? '提交中…' : '提交评价' }}
+          {{ submitting ? t('common.submitting') : t('review.submitReview') }}
         </button>
       </div>
     </template>
@@ -67,9 +67,11 @@
 import { ref, onMounted, reactive } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getOrder, createReview, getOrderReview } from '../api.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const route = useRoute()
 const router = useRouter()
+const { t } = useLocale()
 const orderNo = route.params.orderNo
 const order = ref(null)
 const loading = ref(true)
@@ -93,7 +95,7 @@ async function loadOrder() {
     try {
       const existing = await getOrderReview(orderNo)
       if (existing && existing.id) {
-        alert('该订单已评价')
+        alert(t('review.alreadyReviewed'))
         router.replace(`/order/${orderNo}`)
       }
     } catch {
@@ -141,11 +143,11 @@ async function submitReview() {
       content: form.content,
       images,
     })
-    alert('评价提交成功！')
+    alert(t('review.submitSuccess'))
     router.replace(`/order/${orderNo}`)
   } catch (e) {
     console.error('提交评价失败', e)
-    alert(e.message || '提交失败，请重试')
+    alert(e.message || t('review.submitFailed'))
   } finally {
     submitting.value = false
   }

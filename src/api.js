@@ -10,6 +10,18 @@ const STORAGE_TENANT = 'travel_tenant_id'
 const STORAGE_MERCHANT = 'travel_merchant_id'
 const STORAGE_TOKEN = 'travel_user_token'
 const STORAGE_USER = 'travel_user_info'
+const STORAGE_LOCALE = 'travel_locale'
+const STORAGE_CURRENCY = 'travel_currency'
+
+/** 当前语言（用于 Accept-Language 头，驱动后端错误/内容本地化）。 */
+export function getLocale() {
+  return localStorage.getItem(STORAGE_LOCALE) || 'en-US'
+}
+
+/** 当前展示币种（用于 X-Display-Currency 头，驱动后端下单锁汇）。 */
+export function getDisplayCurrency() {
+  return localStorage.getItem(STORAGE_CURRENCY) || 'AED'
+}
 
 /** 获取当前租户 ID（默认 1，可在"我的 → 设置"中修改） */
 export function getTenantId() {
@@ -39,6 +51,8 @@ async function request(path, options = {}) {
     'Content-Type': 'application/json',
     'X-Tenant-ID': getTenantId(),
     'X-Merchant-ID': getMerchantId(),
+    'Accept-Language': getLocale(),
+    'X-Display-Currency': getDisplayCurrency(),
     ...options.headers,
   }
   // Attach Bearer token if user is logged in
@@ -57,6 +71,18 @@ async function request(path, options = {}) {
     throw new Error(data.msg)
   }
   return data
+}
+
+/* ── 货币 / 汇率 ── */
+
+/** 获取支持的币种字典 */
+export function getCurrencies() {
+  return request('/api/travel/currencies')
+}
+
+/** 获取以 base（默认 AED）为基准的汇率列表 */
+export function getExchangeRates(base = 'AED') {
+  return request(`/api/travel/currencies/rates?base=${encodeURIComponent(base)}`)
 }
 
 /* ── 商品（消费者公开接口） ── */

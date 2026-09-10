@@ -3,66 +3,76 @@
     <!-- 加载中 -->
     <div v-if="loading" class="result-state loading-state">
       <div class="spinner"></div>
-      <h2>支付处理中</h2>
-      <p class="muted">正在确认您的 PayPal 付款，请稍候…</p>
+      <h2>{{ t('paymentReturn.processing') }}</h2>
+      <p class="muted">{{ t('paymentReturn.processingHint') }}</p>
     </div>
 
     <!-- 支付成功 -->
     <div v-else-if="payment" class="result-state">
       <div class="success-icon">✓</div>
-      <h1>支付成功</h1>
-      <p class="muted">您的 PayPal 付款已确认</p>
+      <h1>{{ t('paymentReturn.success') }}</h1>
+      <p class="muted">{{ t('paymentReturn.successHint') }}</p>
 
       <section class="result-card">
         <div class="result-row">
-          <span>支付单号</span>
+          <span>{{ t('paymentReturn.paymentNo') }}</span>
           <span class="mono">{{ payment.paymentNo }}</span>
         </div>
         <div class="result-row">
-          <span>订单号</span>
+          <span>{{ t('paymentReturn.orderNo') }}</span>
           <span class="mono">{{ payment.orderNo }}</span>
         </div>
         <div class="result-row">
-          <span>支付方式</span>
-          <span>PayPal</span>
+          <span>{{ t('paymentReturn.payMethod') }}</span>
+          <span>{{ t('payment.paypal') }}</span>
         </div>
         <div class="result-row total">
-          <span>支付金额</span>
-          <strong>{{ payment.currency }} {{ payment.amount }}</strong>
+          <span>{{ t('paymentReturn.payAmount') }}</span>
+          <strong>{{ payAmountText }}</strong>
         </div>
       </section>
 
       <div class="result-actions">
-        <router-link :to="`/order/${payment.orderNo}`" class="btn-primary">查看订单</router-link>
-        <router-link to="/orders" class="btn-secondary">我的订单</router-link>
-        <router-link to="/" class="btn-secondary">继续浏览</router-link>
+        <router-link :to="`/order/${payment.orderNo}`" class="btn-primary">{{ t('paymentReturn.viewOrder') }}</router-link>
+        <router-link to="/orders" class="btn-secondary">{{ t('paymentReturn.myOrders') }}</router-link>
+        <router-link to="/" class="btn-secondary">{{ t('paymentReturn.continueBrowse') }}</router-link>
       </div>
     </div>
 
     <!-- 支付失败 -->
     <div v-else class="result-state error-state">
       <div class="fail-icon">✕</div>
-      <h1>支付确认失败</h1>
+      <h1>{{ t('paymentReturn.failed') }}</h1>
       <p class="error-msg">{{ errorMsg }}</p>
-      <p class="muted">如已扣款，请稍后在「我的订单」中查看，资金将在几分钟内原路退回。</p>
+      <p class="muted">{{ t('paymentReturn.failedHint') }}</p>
 
       <div class="result-actions">
-        <router-link to="/orders" class="btn-primary">查看我的订单</router-link>
-        <router-link to="/" class="btn-secondary">返回首页</router-link>
+        <router-link to="/orders" class="btn-primary">{{ t('paymentReturn.viewMyOrders') }}</router-link>
+        <router-link to="/" class="btn-secondary">{{ t('paymentReturn.backHome') }}</router-link>
       </div>
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRoute } from 'vue-router'
 import { capturePaypalPayment } from '../api.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const route = useRoute()
+const { t, formatAmount } = useLocale()
 const loading = ref(true)
 const payment = ref(null)
 const errorMsg = ref('')
+
+const payAmountText = computed(() => {
+  const p = payment.value
+  if (!p) return '--'
+  const cur = p.displayCurrency || p.currency
+  const amt = p.displayAmount != null ? p.displayAmount : p.amount
+  return formatAmount(amt, cur)
+})
 
 onMounted(async () => {
   try {
@@ -71,7 +81,7 @@ onMounted(async () => {
     const data = await capturePaypalPayment(qs)
     payment.value = data
   } catch (e) {
-    errorMsg.value = e.message || '支付确认失败，请稍后重试'
+    errorMsg.value = e.message || t('paymentReturn.confirmFailed')
   } finally {
     loading.value = false
   }

@@ -1,7 +1,7 @@
 <template>
   <div class="page-detail">
-    <div v-if="loading" class="center" style="padding-top:120px">加载中…</div>
-    <div v-else-if="!product" class="center empty">商品不存在或已下架</div>
+    <div v-if="loading" class="center" style="padding-top:120px">{{ t('product.loading') }}</div>
+    <div v-else-if="!product" class="center empty">{{ t('product.notFound') }}</div>
     <template v-else>
 
       <!-- 1. 图片轮播 -->
@@ -14,13 +14,13 @@
           <div class="carousel-counter">1/{{ allImages.length }}</div>
         </div>
         <div class="carousel-tabs">
-          <span class="carousel-tab active">封面</span>
-          <span class="carousel-tab">景点</span>
-          <span class="carousel-tab">内部环境</span>
-          <span class="carousel-tab">服务人员 2/3</span>
-          <span class="carousel-tab">点评</span>
+          <span class="carousel-tab active">{{ t('product.tabCover') }}</span>
+          <span class="carousel-tab">{{ t('product.tabScenic') }}</span>
+          <span class="carousel-tab">{{ t('product.tabInterior') }}</span>
+          <span class="carousel-tab">{{ t('product.tabStaff') }}</span>
+          <span class="carousel-tab">{{ t('product.tabReviews') }}</span>
         </div>
-        <button class="album-btn" @click="showAlbum = true">相册 &gt;</button>
+        <button class="album-btn" @click="showAlbum = true">{{ t('product.album') }}</button>
         <button class="fav-btn-carousel" @click="toggle(product.id)">
           {{ isFav(product.id) ? '♥' : '♡' }}
         </button>
@@ -29,21 +29,20 @@
       <!-- 2. 价格 + 销量 -->
       <div class="detail-price-row">
         <div class="price-main">
-          <span class="price-symbol">¥</span>
           <span class="price-value">{{ formatPrice(displayMinPrice) }}</span>
-          <span class="price-unit">起</span>
+          <span class="price-unit">{{ t('product.from') }}</span>
           <span class="price-info-icon">ⓘ</span>
         </div>
-        <div class="price-sales">月销{{ monthlySales }}</div>
+        <div class="price-sales">{{ t('product.monthlySales', { count: monthlySales }) }}</div>
       </div>
 
       <!-- 3. 优惠标签 -->
       <div class="detail-promo-tags">
-        <span class="promo-tag new">新客</span>
-        <span class="promo-tag">最高减¥50</span>
-        <span class="promo-tag">拿去花·信用购</span>
-        <span class="promo-tag">立减30元</span>
-        <span class="promo-link">去领券 &gt;</span>
+        <span class="promo-tag new">{{ t('product.promoNew') }}</span>
+        <span class="promo-tag">{{ t('product.promoMaxOff') }}</span>
+        <span class="promo-tag">{{ t('product.promoCredit') }}</span>
+        <span class="promo-tag">{{ t('product.promoInstant') }}</span>
+        <span class="promo-link">{{ t('product.promoCoupon') }}</span>
       </div>
 
       <!-- 4. 标题 -->
@@ -51,23 +50,23 @@
 
       <!-- 5. 标签行 -->
       <div class="detail-tags-row">
-        <span class="tag-blue">携程优选</span>
-        <span class="tag-orange">{{ product.destination || 'Dubai' }}热卖</span>
-        <span class="tag-normal">放心游</span>
-        <span class="tag-normal">上门接送等 &gt;</span>
+        <span class="tag-blue">{{ t('product.tagPreferred') }}</span>
+        <span class="tag-orange">{{ t('product.tagHot', { dest: product.destination || 'Dubai' }) }}</span>
+        <span class="tag-normal">{{ t('product.tagWorryFree') }}</span>
+        <span class="tag-normal">{{ t('product.tagPickup') }}</span>
       </div>
 
       <!-- 6. 评分 -->
       <div class="detail-rating-row" @click="scrollToReviews">
         <span class="rating-score">{{ avgRating ? avgRating.toFixed(1) : '--' }}</span>
-        <span class="rating-text">"好评如潮"</span>
-        <span class="rating-count">{{ reviewTotal }}条点评 &gt;</span>
+        <span class="rating-text">{{ t('product.ratingPraise') }}</span>
+        <span class="rating-count">{{ t('product.reviewCount', { count: reviewTotal }) }}</span>
       </div>
 
       <!-- 7. 产品亮点 -->
       <div class="detail-highlights-card">
         <div class="highlights-header">
-          <h3>产品亮点</h3>
+          <h3>{{ t('product.highlights') }}</h3>
           <span class="highlights-emoji">👍</span>
         </div>
         <div class="highlights-list" :class="{ expanded: highlightsExpanded }">
@@ -76,15 +75,15 @@
           </p>
         </div>
         <div v-if="highlightList.length > 2" class="highlights-more" @click="highlightsExpanded = !highlightsExpanded">
-          {{ highlightsExpanded ? '收起' : '查看更多' }} &gt;
+          {{ highlightsExpanded ? t('common.collapse') : t('common.more') }} &gt;
         </div>
       </div>
 
       <!-- 8. 选择日期·套餐 -->
       <div class="detail-datetime-section">
         <div class="datetime-header">
-          <h2>选择日期·套餐</h2>
-          <span class="datetime-refund">提前3天23:59前无损退 &gt;</span>
+          <h2>{{ t('product.selectDatePackage') }}</h2>
+          <span class="datetime-refund">{{ t('product.refundBefore') }}</span>
         </div>
 
         <!-- 横向日期条 -->
@@ -98,12 +97,12 @@
           >
             <span class="date-weekday">{{ d.weekday }}</span>
             <span class="date-day">{{ d.day }}</span>
-            <span class="date-price" v-if="d.price !== null">¥{{ formatPrice(d.price) }}</span>
-            <span class="date-unavailable" v-else>不可订</span>
+            <span class="date-price" v-if="d.price !== null">{{ formatPrice(d.price) }}</span>
+            <span class="date-unavailable" v-else>{{ t('product.unavailable') }}</span>
           </div>
           <div class="date-cell more-dates" @click="openCalendar">
-            <span class="date-weekday">更多</span>
-            <span class="date-day">日期</span>
+            <span class="date-weekday">{{ t('product.moreDates') }}</span>
+            <span class="date-day">{{ t('product.moreDatesSub') }}</span>
           </div>
         </div>
 
@@ -116,31 +115,31 @@
             :class="{ selected: selectedPkg?.id === pkg.id }"
             @click="selectPkg(pkg)"
           >
-            <div v-if="pkg.id === activePackages[0].id" class="pkg-badge hot">近1月飙升</div>
-            <div v-if="pkg.id === activePackages[activePackages.length - 1].id && activePackages.length > 1" class="pkg-badge low">低价</div>
+            <div v-if="pkg.id === activePackages[0].id" class="pkg-badge hot">{{ t('product.pkgHot') }}</div>
+            <div v-if="pkg.id === activePackages[activePackages.length - 1].id && activePackages.length > 1" class="pkg-badge low">{{ t('product.pkgLow') }}</div>
             <div class="pkg-name">{{ pkg.name }}</div>
             <div class="pkg-desc">{{ pkg.code }}</div>
             <div class="pkg-price">
-              <span class="pkg-price-value">¥{{ formatPrice(displayMinPrice) }}</span>
-              <span class="pkg-price-unit">起</span>
+              <span class="pkg-price-value">{{ formatPrice(displayMinPrice) }}</span>
+              <span class="pkg-price-unit">{{ t('product.from') }}</span>
             </div>
           </div>
         </div>
 
         <!-- 底部说明 -->
         <div class="datetime-footer">
-          <span>① 最晚今日22:00（当地时间）前可订明日 | 以上价格按1份起订，计算平均每份套餐价格</span>
+          <span>{{ t('product.datetimeFooter') }}</span>
         </div>
         <div class="datetime-footer2">
-          <span class="fav-count">400+人收藏</span>
+          <span class="fav-count">{{ t('product.favCount') }}</span>
         </div>
       </div>
 
       <!-- 行程 -->
       <div v-if="itineraryStops.length" class="detail-itinerary-section">
         <div class="itinerary-header">
-          <h2>行程</h2>
-          <span class="itinerary-count">共{{ itineraryStops.length }}个节点</span>
+          <h2>{{ t('product.itinerary') }}</h2>
+          <span class="itinerary-count">{{ t('product.itineraryCount', { count: itineraryStops.length }) }}</span>
         </div>
         <div class="itinerary-timeline">
           <div v-for="(stop, i) in itineraryStops" :key="stop.id || i" class="itinerary-item">
@@ -161,7 +160,7 @@
                 <img v-for="(img, ii) in stopImages(stop)" :key="ii" :src="img" alt=""/>
               </div>
               <div v-if="isPickupMeeting(stop)" class="itinerary-pickup-range">
-                <div class="range-label">接送范围</div>
+                <div class="range-label">{{ t('product.pickupRange') }}</div>
                 <div class="range-tags">
                   <span class="range-tag">{{ pickupRangeModeLabel(stop.tp) }}</span>
                   <span v-for="opt in pickupRangeOptionLabels(stop.tp)" :key="opt" class="range-tag">{{ opt }}</span>
@@ -170,9 +169,9 @@
               </div>
               <div v-if="stop.stopType === 'RETURN'" class="itinerary-return">
                 <div v-if="stop.tp.dropoffService" class="return-block">
-                  <div class="return-label">提供送回服务</div>
+                  <div class="return-label">{{ t('product.dropoffService') }}</div>
                   <div v-for="(r, ri) in stop.tp.dropoffPoints" :key="'d'+ri" class="return-dropoff">
-                    <div class="return-line">{{ r.time }} · {{ r.city }}送回</div>
+                    <div class="return-line">{{ r.time }} · {{ t('product.dropoffCity', { city: r.city }) }}</div>
                     <div class="range-tags">
                       <span class="range-tag">{{ pickupRangeModeLabel(r) }}</span>
                       <span v-for="opt in pickupRangeOptionLabels(r)" :key="opt" class="range-tag">{{ opt }}</span>
@@ -182,11 +181,11 @@
                   </div>
                 </div>
                 <div v-if="stop.tp.dispersalService" class="return-block">
-                  <div class="return-label">返回解散点解散</div>
+                  <div class="return-label">{{ t('product.disperseService') }}</div>
                   <div v-for="(r, ri) in stop.tp.dispersalPoints" :key="'s'+ri" class="return-line">{{ r.time }} · {{ r.city }} · {{ r.pointName }}</div>
                 </div>
                 <div v-if="stop.tp.freeDispersal" class="return-block">
-                  <div class="return-label">自由解散</div>
+                  <div class="return-label">{{ t('product.freeDispersal') }}</div>
                 </div>
               </div>
             </div>
@@ -196,18 +195,18 @@
 
       <!-- 9. 产品描述 -->
       <div v-if="product.description" class="detail-desc-section">
-        <h2>详情</h2>
+        <h2>{{ t('product.detail') }}</h2>
         <p class="detail-desc-text" :class="{ expanded: descExpanded }" @click="descExpanded = !descExpanded">
           {{ product.description }}
         </p>
         <small v-if="(product.description || '').length > 100" class="desc-toggle">
-          {{ descExpanded ? '收起 ▲' : '展开更多 ▼' }}
+          {{ descExpanded ? t('product.collapseText') : t('product.expandMore') }}
         </small>
       </div>
 
       <!-- 10. 预订须知 -->
       <div v-if="product.bookingNotice" class="detail-notice-section">
-        <h2>预订须知</h2>
+        <h2>{{ t('product.bookingNotice') }}</h2>
         <div class="booking-notice">
           <p>{{ product.bookingNotice }}</p>
         </div>
@@ -215,12 +214,12 @@
 
       <!-- 11. 用户评价 -->
       <div class="detail-reviews-section" ref="reviewsSection">
-        <h2>用户评价 ({{ reviewTotal }})</h2>
-        <div v-if="reviews.length === 0 && !loading" class="reviews-empty">暂无评价，快来成为第一个评价的人吧！</div>
+        <h2>{{ t('product.userReviews', { count: reviewTotal }) }}</h2>
+        <div v-if="reviews.length === 0 && !loading" class="reviews-empty">{{ t('product.noReviews') }}</div>
         <div v-else class="reviews-list">
           <div v-for="r in reviews" :key="r.id" class="review-item">
             <div class="review-top">
-              <span class="review-user">{{ r.userName || '匿名用户' }}</span>
+              <span class="review-user">{{ r.userName || t('product.anonymous') }}</span>
               <div class="review-stars">
                 <span v-for="n in 5" :key="n" class="mini-star" :class="{ active: r.rating >= n }">★</span>
               </div>
@@ -230,7 +229,7 @@
               <img v-for="(img, i) in r.images.split(',').filter(Boolean)" :key="i" :src="img" class="review-thumb" alt=""/>
             </div>
             <div v-if="r.replyContent" class="review-reply">
-              <strong>商家回复：</strong>{{ r.replyContent }}
+              <strong>{{ t('product.merchantReply') }}</strong>{{ r.replyContent }}
             </div>
           </div>
         </div>
@@ -243,15 +242,15 @@
       <div class="detail-action-bar-v2">
         <div class="action-icons">
           <div class="action-icon" @click="router.push('/')">
-            <span>🏠</span><small>店铺</small>
+            <span>🏠</span><small>{{ t('product.shop') }}</small>
           </div>
           <div class="action-icon" @click="toggle(product.id)">
-            <span>{{ isFav(product.id) ? '♥' : '♡' }}</span><small>收藏</small>
+            <span>{{ isFav(product.id) ? '♥' : '♡' }}</span><small>{{ t('product.favorite') }}</small>
           </div>
         </div>
         <div class="action-buttons">
-          <button class="btn-service" @click="goSupport">问客服</button>
-          <button class="btn-book-v2" :disabled="!canBook" @click="openBookingModal">立即预订</button>
+          <button class="btn-service" @click="goSupport">{{ t('product.askService') }}</button>
+          <button class="btn-book-v2" :disabled="!canBook" @click="openBookingModal">{{ t('product.bookNow') }}</button>
         </div>
       </div>
 
@@ -260,22 +259,22 @@
         <div class="calendar-modal">
           <div class="calendar-header">
             <button class="cal-close" @click="showCalendar = false">✕</button>
-            <h3>选择日期</h3>
+            <h3>{{ t('product.selectDate') }}</h3>
           </div>
           <div class="calendar-tip">
-            ① 以下价格按1份起订，计算平均每份套餐价格
+            {{ t('product.calendarTip') }}
           </div>
 
           <!-- 月份导航 -->
           <div class="cal-month-nav">
             <button class="cal-nav-btn" @click="calPrevMonth">‹</button>
-            <span class="cal-month-title">{{ calYear }}年{{ calMonth }}月</span>
+            <span class="cal-month-title">{{ t('product.calMonthTitle', { year: calYear, month: calMonth }) }}</span>
             <button class="cal-nav-btn" @click="goNextMonth">›</button>
           </div>
 
           <!-- 星期标题 -->
           <div class="cal-weekdays">
-            <span v-for="w in ['日','一','二','三','四','五','六']" :key="w" class="cal-weekday" :class="{ weekend: w === '日' || w === '六' }">{{ w }}</span>
+            <span v-for="(w, wi) in weekdayLabels" :key="wi" class="cal-weekday" :class="{ weekend: wi === 0 || wi === 6 }">{{ w }}</span>
           </div>
 
           <!-- 日期网格 -->
@@ -295,16 +294,16 @@
               @click="d.available && selectDateFromCal(d.dateStr)"
             >
               <span class="cal-day-num">{{ d.day }}</span>
-              <span class="cal-day-price" v-if="d.price !== null">¥{{ formatPrice(d.price) }}</span>
-              <span class="cal-day-unavail" v-else-if="!d.available">不可订</span>
+              <span class="cal-day-price" v-if="d.price !== null">{{ formatPrice(d.price) }}</span>
+              <span class="cal-day-unavail" v-else-if="!d.available">{{ t('product.unavailable') }}</span>
               <span class="cal-holiday-tag" v-if="d.holiday">{{ d.holiday }}</span>
             </div>
           </div>
 
           <!-- 下月 -->
-          <div class="cal-month-title" style="margin-top:16px;padding:0 8px">{{ calNextYear }}年{{ calNextMonth }}月</div>
+          <div class="cal-month-title" style="margin-top:16px;padding:0 8px">{{ t('product.calMonthTitle', { year: calNextYear, month: calNextMonth }) }}</div>
           <div class="cal-weekdays">
-            <span v-for="w in ['日','一','二','三','四','五','六']" :key="w" class="cal-weekday" :class="{ weekend: w === '日' || w === '六' }">{{ w }}</span>
+            <span v-for="(w, wi) in weekdayLabels" :key="wi" class="cal-weekday" :class="{ weekend: wi === 0 || wi === 6 }">{{ w }}</span>
           </div>
           <div class="cal-days">
             <div v-for="n in calNextLeadingZeros" :key="'ne'+n" class="cal-day empty"></div>
@@ -322,8 +321,8 @@
               @click="d.available && selectDateFromCal(d.dateStr)"
             >
               <span class="cal-day-num">{{ d.day }}</span>
-              <span class="cal-day-price" v-if="d.price !== null">¥{{ formatPrice(d.price) }}</span>
-              <span class="cal-day-unavail" v-else-if="!d.available">不可订</span>
+              <span class="cal-day-price" v-if="d.price !== null">{{ formatPrice(d.price) }}</span>
+              <span class="cal-day-unavail" v-else-if="!d.available">{{ t('product.unavailable') }}</span>
               <span class="cal-holiday-tag" v-if="d.holiday">{{ d.holiday }}</span>
             </div>
           </div>
@@ -335,13 +334,13 @@
         <div class="calendar-modal" style="max-width:500px">
           <div class="calendar-header">
             <button class="cal-close" @click="showAlbum = false">✕</button>
-            <h3>产品相册</h3>
+            <h3>{{ t('product.productAlbum') }}</h3>
           </div>
           <div class="album-grid">
             <div v-for="(img, i) in allImages" :key="i" class="album-item">
               <img :src="img" :alt="'photo ' + (i+1)"/>
             </div>
-            <div v-if="!allImages.length" class="center muted">暂无图片</div>
+            <div v-if="!allImages.length" class="center muted">{{ t('product.noImages') }}</div>
           </div>
         </div>
       </div>
@@ -349,20 +348,20 @@
       <!-- 预订确认弹窗 -->
       <div v-if="showBookingModal" class="calendar-overlay" @click.self="showBookingModal = false">
         <div class="calendar-modal">
-          <h3>确认预订信息</h3>
+          <h3>{{ t('product.confirmBookingInfo') }}</h3>
           <div class="booking-confirm-info">
-            <div class="confirm-row"><span>产品</span><span>{{ product.title }}</span></div>
-            <div class="confirm-row"><span>套餐</span><span>{{ selectedPkg?.name || '-' }}</span></div>
-            <div class="confirm-row"><span>日期</span><span>{{ selectedDate || '-' }}</span></div>
-            <div class="confirm-row"><span>人数</span><span>{{ quantity }}</span></div>
+            <div class="confirm-row"><span>{{ t('product.labelProduct') }}</span><span>{{ product.title }}</span></div>
+            <div class="confirm-row"><span>{{ t('product.labelPackage') }}</span><span>{{ selectedPkg?.name || '-' }}</span></div>
+            <div class="confirm-row"><span>{{ t('product.labelDate') }}</span><span>{{ selectedDate || '-' }}</span></div>
+            <div class="confirm-row"><span>{{ t('product.labelPeople') }}</span><span>{{ quantity }}</span></div>
             <div class="confirm-row total">
-              <span>合计</span>
-              <strong>¥{{ formatPrice((selectedInventory?.unitPrice || displayMinPrice) * quantity) }}</strong>
+              <span>{{ t('product.labelTotal') }}</span>
+              <strong>{{ formatPrice((selectedInventory?.unitPrice || displayMinPrice) * quantity) }}</strong>
             </div>
           </div>
           <div class="modal-actions">
-            <button class="btn-secondary" @click="showBookingModal = false">返回修改</button>
-            <button class="btn-primary" @click="goBooking">确认，去下单</button>
+            <button class="btn-secondary" @click="showBookingModal = false">{{ t('product.backToEdit') }}</button>
+            <button class="btn-primary" @click="goBooking">{{ t('product.confirmGoOrder') }}</button>
           </div>
         </div>
       </div>
@@ -377,12 +376,14 @@ import { useRoute, useRouter } from 'vue-router'
 import { getProductDetail, getProductPackages, checkInventory, batchInventory, getProductReviews, getProductItineraryStops } from '../api.js'
 import { useFavorites } from '../composables/favorites.js'
 import { useUser } from '../composables/user.js'
+import { useLocale } from '../composables/useLocale.js'
 import PickupRangeMap from '../components/PickupRangeMap.vue'
 
 const route = useRoute()
 const router = useRouter()
 const { isFav, toggle } = useFavorites()
 const user = useUser()
+const { t, te, formatPrice } = useLocale()
 
 const product = ref(null)
 const packages = ref([])
@@ -470,12 +471,10 @@ const holidays = {
   '2026-10-07': '国庆节',
 }
 
-const weekdayNames = ['日', '一', '二', '三', '四', '五', '六']
-
-function formatPrice(v) {
-  if (v == null) return '--'
-  return String(v)
-}
+const weekdayLabels = computed(() => [
+  t('product.weekday.sun'), t('product.weekday.mon'), t('product.weekday.tue'),
+  t('product.weekday.wed'), t('product.weekday.thu'), t('product.weekday.fri'), t('product.weekday.sat'),
+])
 
 function destEmoji(dest) {
   const map = { 'desert': '️', 'abu dhabi': '🕌', 'marina': '⛵', 'culture': '🎭' }
@@ -502,7 +501,7 @@ const dateStrip = computed(() => {
     const available = !isPastDate(dateStr) && (!inv || inv.isOpen !== false)
     days.push({
       dateStr,
-      weekday: weekdayNames[d.getDay()],
+      weekday: weekdayLabels.value[d.getDay()],
       day: d.getDate(),
       price: inv ? inv.unitPrice : null,
       available,
@@ -706,9 +705,7 @@ async function loadReviews() {
 }
 
 // ── 行程展示 ──
-const stopTypeLabels = { MEETING: '集合', ACTIVITY: '地点和活动', TRANSPORT: '行中交通', MEAL: '行中餐食', RETURN: '返程' }
 const stopTypeIcons = { MEETING: '🚩', ACTIVITY: '📍', TRANSPORT: '🚌', MEAL: '🍽️', RETURN: '🏁' }
-const mealLabels = { BREAKFAST: '早餐', LUNCH: '午餐', DINNER: '晚餐', AFTERNOON_TEA: '下午茶', MIDNIGHT_SNACK: '夜宵', MORNING_TEA: '早茶' }
 
 function parseTp(raw) {
   if (!raw) return {}
@@ -728,18 +725,19 @@ async function loadItinerary() {
   }
 }
 
-function stopTypeLabel(t) {
-  return stopTypeLabels[t] || t
+function stopTypeLabel(type) {
+  const key = 'product.stopType.' + type
+  return te(key) ? t(key) : (type || '')
 }
 
-function stopIcon(t) {
-  return stopTypeIcons[t] || '•'
+function stopIcon(type) {
+  return stopTypeIcons[type] || '•'
 }
 
 function fmtDuration(h, m) {
   const parts = []
-  if (h) parts.push(`${h}小时`)
-  if (m) parts.push(`${m}分钟`)
+  if (h) parts.push(t('product.durationHour', { h }))
+  if (m) parts.push(t('product.durationMinute', { m }))
   return parts.join('')
 }
 
@@ -747,16 +745,19 @@ function stopTitle(stop) {
   const tp = stop.tp || {}
   switch (stop.stopType) {
     case 'MEETING':
-      if (tp.meetingMode === 'POINT') return tp.meetingPoint || '集合点集合'
-      return tp.pickupCity ? `${tp.pickupCity}上门接` : '上门接'
+      if (tp.meetingMode === 'POINT') return tp.meetingPoint || t('product.meetingPointDefault')
+      return tp.pickupCity ? t('product.pickupCity', { city: tp.pickupCity }) : t('product.pickupDefault')
     case 'ACTIVITY':
-      return stop.poiName || stop.title || '地点和活动'
+      return stop.poiName || stop.title || t('product.stopType.ACTIVITY')
     case 'TRANSPORT':
-      return stop.transportType ? `${stop.transportType}出行` : (stop.title || '行中交通')
-    case 'MEAL':
-      return mealLabels[tp.mealType] || stop.title || '行中餐食'
+      return stop.transportType ? t('product.transportGo', { type: stop.transportType }) : (stop.title || t('product.stopType.TRANSPORT'))
+    case 'MEAL': {
+      const mealKey = 'product.meal.' + tp.mealType
+      const mealName = tp.mealType && te(mealKey) ? t(mealKey) : ''
+      return mealName || stop.title || t('product.stopType.MEAL')
+    }
     default:
-      return stop.title || '返程'
+      return stop.title || t('product.stopType.RETURN')
   }
 }
 
@@ -765,23 +766,23 @@ function stopMeta(stop) {
   const meta = []
   if (stop.stopType === 'MEETING') {
     if (tp.meetingMode === 'POINT') {
-      if (tp.meetingTime) meta.push(`${tp.meetingTime} 集合`)
+      if (tp.meetingTime) meta.push(t('product.meetingAt', { time: tp.meetingTime }))
       if (tp.meetingCity) meta.push(tp.meetingCity)
     } else {
-      if (tp.pickupTime) meta.push(`${tp.pickupTime} 接站`)
+      if (tp.pickupTime) meta.push(t('product.pickupAt', { time: tp.pickupTime }))
       if (tp.pickupCity) meta.push(tp.pickupCity)
       if (tp.pickupDistrict) meta.push(tp.pickupDistrict)
     }
   } else if (stop.stopType === 'ACTIVITY') {
-    meta.push(stop.isEntering === false ? '不入内' : '入内参观')
+    meta.push(stop.isEntering === false ? t('product.notEntering') : t('product.entering'))
     const d = fmtDuration(stop.durationHours, stop.durationMinutes)
-    if (d) meta.push(`体验${d}`)
+    if (d) meta.push(t('product.experience', { d }))
   } else if (stop.stopType === 'TRANSPORT') {
     const d = fmtDuration(stop.durationHours, stop.durationMinutes)
-    if (d) meta.push(`车程${d}`)
+    if (d) meta.push(t('product.driveTime', { d }))
   } else if (stop.stopType === 'MEAL') {
     const d = fmtDuration(stop.durationHours, stop.durationMinutes)
-    if (d) meta.push(`用餐${d}`)
+    if (d) meta.push(t('product.mealTime', { d }))
   }
   return meta
 }
@@ -814,19 +815,19 @@ function pickupPolygon(tp) {
 }
 
 function pickupRangeModeLabel(tp) {
-  const t = tp || {}
-  const mode = t.pickupRangeMode || t.rangeMode
-  return mode === 'PARTIAL' ? '仅列表部分酒店/地点' : '自定义接送范围'
+  const p = tp || {}
+  const mode = p.pickupRangeMode || p.rangeMode
+  return mode === 'PARTIAL' ? t('product.rangePartial') : t('product.rangeCustom')
 }
 
 function pickupRangeOptionLabels(tp) {
-  const t = tp || {}
-  const opts = t.pickupRangeOptions || t.rangeOptions || {}
+  const p = tp || {}
+  const opts = p.pickupRangeOptions || p.rangeOptions || {}
   const labels = []
-  if (opts.drawAllAreas) labels.push('覆盖范围内所有区域')
-  if (opts.drawAllHotels) labels.push('覆盖范围内所有酒店')
-  if (opts.drawAllStations) labels.push('覆盖所有机场/火车站')
-  if (opts.extraCharge) labels.push('超范围可付费接送')
+  if (opts.drawAllAreas) labels.push(t('product.rangeAllAreas'))
+  if (opts.drawAllHotels) labels.push(t('product.rangeAllHotels'))
+  if (opts.drawAllStations) labels.push(t('product.rangeAllStations'))
+  if (opts.extraCharge) labels.push(t('product.rangeExtraCharge'))
   return labels
 }
 

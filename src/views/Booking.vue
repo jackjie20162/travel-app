@@ -2,25 +2,25 @@
   <div class="page-booking">
     <!-- 返回链接 -->
     <div class="booking-nav">
-      <button class="back-link" @click="goBackToProduct">← 返回产品</button>
+      <button class="back-link" @click="goBackToProduct">{{ t('booking.backToProduct') }}</button>
     </div>
 
     <!-- 步骤条 -->
     <div class="booking-stepper">
-      <div class="step active"><span class="step-num">1</span><small>选择</small></div>
+      <div class="step active"><span class="step-num">1</span><small>{{ t('booking.step1') }}</small></div>
       <div class="step-line"></div>
-      <div class="step active current"><span class="step-num">2</span><small>确认</small></div>
+      <div class="step active current"><span class="step-num">2</span><small>{{ t('booking.step2') }}</small></div>
       <div class="step-line"></div>
-      <div class="step"><span class="step-num">3</span><small>支付</small></div>
+      <div class="step"><span class="step-num">3</span><small>{{ t('booking.step3') }}</small></div>
     </div>
 
-    <div v-if="loading" style="text-align:center;padding:60px 0;color:#94a3b8">加载产品信息中…</div>
+    <div v-if="loading" style="text-align:center;padding:60px 0;color:#94a3b8">{{ t('booking.loadingProduct') }}</div>
     <div v-else-if="loadError" style="text-align:center;padding:60px 0;color:#ef4444">
       <p>{{ loadError }}</p>
-      <button class="back-link" @click="goBackToProduct" style="margin-top:12px">← 返回</button>
+      <button class="back-link" @click="goBackToProduct" style="margin-top:12px">{{ t('common.back') }}</button>
     </div>
     <template v-else>
-    <h2>确认预订</h2>
+    <h2>{{ t('booking.confirmBooking') }}</h2>
 
     <!-- 产品标题 + 退订政策 -->
     <div class="booking-product-header">
@@ -39,68 +39,68 @@
     <section class="quantity-stepper-card">
       <div class="stepper-row">
         <div class="stepper-label">
-          <span class="stepper-title">人数</span>
+          <span class="stepper-title">{{ t('booking.people') }}</span>
         </div>
         <div class="stepper-control">
-          <span class="stepper-price">{{ currency }} {{ formatPrice(unitPrice) }}</span>
+          <span class="stepper-price">{{ formatPrice(unitPrice) }}</span>
           <button class="stepper-btn minus" :disabled="qty <= 1" @click="decreaseQty">−</button>
           <span class="stepper-value">{{ qty }}</span>
           <button class="stepper-btn plus" @click="increaseQty">+</button>
         </div>
       </div>
-      <div class="stepper-hint">最多预订{{ maxQty }}份</div>
+      <div class="stepper-hint">{{ t('booking.maxBook', { max: maxQty }) }}</div>
     </section>
 
     <!-- 游客信息 -->
     <section class="booking-section">
       <div class="section-header">
-        <h3>游客信息 <span class="traveler-count">共 {{ travelers.length }} 位</span></h3>
+        <h3>{{ t('booking.travelerInfo') }} <span class="traveler-count">{{ t('booking.travelerCount', { count: travelers.length }) }}</span></h3>
         <div style="display:flex;gap:8px">
-          <button class="btn-add-traveler" @click="openTravelersModal">从保存选择</button>
-          <button class="btn-add-traveler" @click="addTraveler">+ 添加游客</button>
+          <button class="btn-add-traveler" @click="openTravelersModal">{{ t('booking.selectSaved') }}</button>
+          <button class="btn-add-traveler" @click="addTraveler">{{ t('booking.addTraveler') }}</button>
         </div>
       </div>
 
       <div
-        v-for="(t, idx) in travelers"
+        v-for="(traveler, idx) in travelers"
         :key="idx"
         class="traveler-card"
       >
         <div class="traveler-card-header">
-          <span class="traveler-index">游客 {{ idx + 1 }}</span>
+          <span class="traveler-index">{{ t('booking.travelerIndex', { index: idx + 1 }) }}</span>
           <button
             v-if="travelers.length > 1"
             class="btn-remove-traveler"
             @click="removeTraveler(idx)"
-          >删除</button>
+          >{{ t('common.delete') }}</button>
         </div>
 
         <!-- 证件类型：行内选择器 -->
         <div class="form-row" @click="cycleIdType(idx)">
-          <span class="row-label">证件类型</span>
+          <span class="row-label">{{ t('booking.idType') }}</span>
           <span class="row-value picker">
-            {{ idTypeLabel(t.idType) }}
+            {{ idTypeLabel(traveler.idType) }}
             <span class="arrow">›</span>
           </span>
         </div>
 
         <!-- 姓名：支持中/英/阿拉伯语切换 -->
-        <div class="form-row name-row" :class="{ 'rtl': t.nameLang === 'ar' }">
+        <div class="form-row name-row" :class="{ 'rtl': traveler.nameLang === 'ar' }">
           <span class="row-label">
-            {{ nameLangLabel(t.nameLang) }}姓名 <em>*</em>
+            {{ t('booking.nameLabel', { lang: nameLangLabel(traveler.nameLang) }) }} <em>*</em>
           </span>
           <div class="row-input-wrap">
             <input
-              v-model="t.name"
-              :placeholder="namePlaceholder(t.nameLang)"
-              :dir="t.nameLang === 'ar' ? 'rtl' : 'ltr'"
+              v-model="traveler.name"
+              :placeholder="namePlaceholder(traveler.nameLang)"
+              :dir="traveler.nameLang === 'ar' ? 'rtl' : 'ltr'"
             />
             <div class="lang-toggles">
               <button
                 v-for="lang in ['zh','en','ar']"
                 :key="lang"
-                :class="['lang-btn', { active: t.nameLang === lang }]"
-                @click.stop="t.nameLang = lang"
+                :class="['lang-btn', { active: traveler.nameLang === lang }]"
+                @click.stop="traveler.nameLang = lang"
               >{{ langLabel(lang) }}</button>
             </div>
           </div>
@@ -108,25 +108,25 @@
 
         <!-- 证件号 -->
         <div class="form-row">
-          <span class="row-label">证件号</span>
+          <span class="row-label">{{ t('booking.idNumber') }}</span>
           <div class="row-input-wrap">
             <input
-              v-model="t.idNumber"
-              :placeholder="idNumberPlaceholder(t.idType)"
-              :dir="t.nameLang === 'ar' ? 'rtl' : 'ltr'"
+              v-model="traveler.idNumber"
+              :placeholder="idNumberPlaceholder(traveler.idType)"
+              :dir="traveler.nameLang === 'ar' ? 'rtl' : 'ltr'"
             />
           </div>
         </div>
 
         <!-- 手机号 -->
         <div class="form-row">
-          <span class="row-label">联系电话</span>
+          <span class="row-label">{{ t('booking.phone') }}</span>
           <div class="row-input-wrap">
             <input
-              v-model="t.phone"
+              v-model="traveler.phone"
               type="tel"
-              placeholder="用于接收行程信息"
-              :dir="t.nameLang === 'ar' ? 'rtl' : 'ltr'"
+              :placeholder="t('booking.phoneHint')"
+              :dir="traveler.nameLang === 'ar' ? 'rtl' : 'ltr'"
             />
           </div>
         </div>
@@ -136,47 +136,47 @@
     <!-- 联系人信息 -->
     <section class="booking-section">
       <div class="section-header">
-        <h3>联系人信息</h3>
-        <button class="btn-add-traveler" @click="openContactsModal">从保存选择</button>
+        <h3>{{ t('booking.contactInfo') }}</h3>
+        <button class="btn-add-traveler" @click="openContactsModal">{{ t('booking.selectSaved') }}</button>
       </div>
       <label>
-        <span>联系人姓名 <em>*</em></span>
-        <input v-model="contact.name" placeholder="请输入联系人姓名" />
+        <span>{{ t('booking.contactName') }} <em>*</em></span>
+        <input v-model="contact.name" :placeholder="t('booking.contactNamePh')" />
       </label>
       <label>
-        <span>联系邮箱 <em>*</em></span>
+        <span>{{ t('booking.contactEmail') }} <em>*</em></span>
         <input v-model="contact.email" type="email" placeholder="your@email.com" />
       </label>
       <label>
-        <span>联系手机</span>
+        <span>{{ t('booking.contactPhone') }}</span>
         <input v-model="contact.phone" type="tel" placeholder="+971 ..." />
       </label>
     </section>
 
     <!-- 特殊需求 -->
     <section class="booking-section">
-      <h3>特殊需求</h3>
+      <h3>{{ t('booking.specialNeeds') }}</h3>
       <label>
-        <span>备注（选填）</span>
-        <textarea v-model="remark" placeholder="如有特殊需求请在此说明…" rows="3"></textarea>
+        <span>{{ t('booking.remark') }}</span>
+        <textarea v-model="remark" :placeholder="t('booking.remarkPh')" rows="3"></textarea>
       </label>
     </section>
 
     <!-- 预订须知 -->
     <section class="booking-section notice">
-      <h3>⚠️ 重要提示</h3>
+      <h3>{{ t('booking.importantNotice') }}</h3>
       <ul>
-        <li>提交订单后库存将自动预留（有效期 15 分钟）</li>
-        <li>请在预留有效期内完成支付，逾期自动释放</li>
-        <li>支付成功后将生成电子凭证</li>
-        <li>价格由系统实时计算，以最终下单金额为准</li>
+        <li>{{ t('booking.notice1') }}</li>
+        <li>{{ t('booking.notice2') }}</li>
+        <li>{{ t('booking.notice3') }}</li>
+        <li>{{ t('booking.notice4') }}</li>
       </ul>
     </section>
 
     <!-- 提交按钮 -->
     <div class="booking-action">
       <button class="btn-primary" :disabled="submitting || !canSubmit" @click="submitOrder">
-        {{ submitting ? '提交中…' : `确认下单 · ${currency} ${formatPrice(totalAmount)}` }}
+        {{ submitting ? t('common.submitting') : t('booking.confirmOrder', { amount: formatPrice(totalAmount) }) }}
       </button>
     </div>
 
@@ -187,10 +187,10 @@
     <div v-if="showTravelersModal" class="modal-overlay" @click.self="showTravelersModal = false">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>常用出行人</h3>
+          <h3>{{ t('booking.savedTravelers') }}</h3>
           <button class="modal-close" @click="showTravelersModal = false">✕</button>
         </div>
-        <div v-if="savedTravelers.length === 0" class="modal-empty">暂无保存的出行人，请新增</div>
+        <div v-if="savedTravelers.length === 0" class="modal-empty">{{ t('booking.noSavedTravelers') }}</div>
         <div v-else class="saved-list">
           <div v-for="st in savedTravelers" :key="st.id" class="saved-item" @click="selectSavedTraveler(st)">
             <div class="saved-item-info">
@@ -198,30 +198,30 @@
               <span class="saved-item-detail">{{ idTypeLabel(st.idType) }} {{ st.idNumber }} · {{ st.phone }}</span>
             </div>
             <div class="saved-item-actions">
-              <button class="btn-saved-edit" @click.stop="startEditSavedTraveler(st)">编辑</button>
-              <button class="btn-saved-del" @click.stop="deleteSavedTraveler(st.id)">删除</button>
+              <button class="btn-saved-edit" @click.stop="startEditSavedTraveler(st)">{{ t('common.edit') }}</button>
+              <button class="btn-saved-del" @click.stop="deleteSavedTraveler(st.id)">{{ t('common.delete') }}</button>
             </div>
           </div>
         </div>
         <div class="modal-form">
-          <h4>{{ editingTravelerIdx >= 0 ? '编辑出行人' : '新增出行人' }}</h4>
+          <h4>{{ editingTravelerIdx >= 0 ? t('booking.editTraveler') : t('booking.newTraveler') }}</h4>
           <div class="modal-form-row">
-            <span class="modal-form-label">姓名 *</span>
-            <input v-model="travelerForm.name" placeholder="请输入姓名" />
+            <span class="modal-form-label">{{ t('booking.name') }}</span>
+            <input v-model="travelerForm.name" :placeholder="t('booking.namePhInput')" />
           </div>
           <div class="modal-form-row" @click="cycleFormIdType">
-            <span class="modal-form-label">证件类型</span>
+            <span class="modal-form-label">{{ t('booking.idType') }}</span>
             <span class="row-value picker">{{ idTypeLabel(travelerForm.idType) }} <span class="arrow">›</span></span>
           </div>
           <div class="modal-form-row">
-            <span class="modal-form-label">证件号</span>
-            <input v-model="travelerForm.idNumber" placeholder="请输入证件号" />
+            <span class="modal-form-label">{{ t('booking.idNumber') }}</span>
+            <input v-model="travelerForm.idNumber" :placeholder="t('booking.idNumberInput')" />
           </div>
           <div class="modal-form-row">
-            <span class="modal-form-label">手机号</span>
-            <input v-model="travelerForm.phone" type="tel" placeholder="请输入手机号" />
+            <span class="modal-form-label">{{ t('booking.mobileLabel') }}</span>
+            <input v-model="travelerForm.phone" type="tel" :placeholder="t('booking.phoneInput')" />
           </div>
-          <button class="btn-save-traveler" @click="saveTravelerForm">保存</button>
+          <button class="btn-save-traveler" @click="saveTravelerForm">{{ t('common.save') }}</button>
         </div>
       </div>
     </div>
@@ -230,10 +230,10 @@
     <div v-if="showContactsModal" class="modal-overlay" @click.self="showContactsModal = false">
       <div class="modal-content">
         <div class="modal-header">
-          <h3>常用联系人</h3>
+          <h3>{{ t('booking.savedContacts') }}</h3>
           <button class="modal-close" @click="showContactsModal = false">✕</button>
         </div>
-        <div v-if="savedContacts.length === 0" class="modal-empty">暂无保存的联系人，请新增</div>
+        <div v-if="savedContacts.length === 0" class="modal-empty">{{ t('booking.noSavedContacts') }}</div>
         <div v-else class="saved-list">
           <div v-for="sc in savedContacts" :key="sc.id" class="saved-item" @click="selectSavedContact(sc)">
             <div class="saved-item-info">
@@ -241,26 +241,26 @@
               <span class="saved-item-detail">{{ sc.email }} · {{ sc.phone }}</span>
             </div>
             <div class="saved-item-actions">
-              <button class="btn-saved-edit" @click.stop="startEditSavedContact(sc)">编辑</button>
-              <button class="btn-saved-del" @click.stop="deleteSavedContact(sc.id)">删除</button>
+              <button class="btn-saved-edit" @click.stop="startEditSavedContact(sc)">{{ t('common.edit') }}</button>
+              <button class="btn-saved-del" @click.stop="deleteSavedContact(sc.id)">{{ t('common.delete') }}</button>
             </div>
           </div>
         </div>
         <div class="modal-form">
-          <h4>{{ editingContactIdx >= 0 ? '编辑联系人' : '新增联系人' }}</h4>
+          <h4>{{ editingContactIdx >= 0 ? t('booking.editContact') : t('booking.newContact') }}</h4>
           <div class="modal-form-row">
-            <span class="modal-form-label">姓名 *</span>
-            <input v-model="contactForm.name" placeholder="请输入姓名" />
+            <span class="modal-form-label">{{ t('booking.name') }}</span>
+            <input v-model="contactForm.name" :placeholder="t('booking.namePhInput')" />
           </div>
           <div class="modal-form-row">
-            <span class="modal-form-label">邮箱 *</span>
-            <input v-model="contactForm.email" type="email" placeholder="请输入邮箱" />
+            <span class="modal-form-label">{{ t('booking.emailLabel') }}</span>
+            <input v-model="contactForm.email" type="email" :placeholder="t('booking.emailInput')" />
           </div>
           <div class="modal-form-row">
-            <span class="modal-form-label">手机</span>
-            <input v-model="contactForm.phone" type="tel" placeholder="请输入手机号" />
+            <span class="modal-form-label">{{ t('booking.phoneLabel') }}</span>
+            <input v-model="contactForm.phone" type="tel" :placeholder="t('booking.phoneInput')" />
           </div>
-          <button class="btn-save-traveler" @click="saveContactForm">保存</button>
+          <button class="btn-save-traveler" @click="saveContactForm">{{ t('common.save') }}</button>
         </div>
       </div>
     </div>
@@ -272,9 +272,11 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createOrder, getProductDetail, getProductPackages, batchInventory } from '../api.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const route = useRoute()
 const router = useRouter()
+const { t, te, formatPrice, currency: selectedCurrency } = useLocale()
 
 /* ── URL 仅传 ID，产品信息通过 API 获取 ── */
 const productId = parseInt(route.query.productId) || 0
@@ -284,7 +286,7 @@ const inventoryId = parseInt(route.query.inventoryId) || 0
 const qty = ref(parseInt(route.query.quantity) || 1)
 
 /* ── 从 API 加载的产品信息 ── */
-const productTitle = ref('旅游产品')
+const productTitle = ref('')
 const currency = ref('AED')
 const unitPrice = ref(0)
 const maxQty = ref(8)
@@ -298,14 +300,14 @@ function emptyTraveler() {
 }
 
 /* ── 退订政策（固定规则） ── */
-const cancelPolicy = '订单确认成功后，取消需收取损失费70%起'
-const cancelPolicyDetail = [
-  '出行前7天以上取消，收取0%损失费',
-  '出行前3-7天取消，收取30%损失费',
-  '出行前1-3天取消，收取50%损失费',
-  '出行当天取消，收取70%损失费',
-  '出行后取消，收取100%损失费',
-]
+const cancelPolicy = computed(() => t('booking.cancelPolicy'))
+const cancelPolicyDetail = computed(() => [
+  t('booking.cancelPolicyDetail1'),
+  t('booking.cancelPolicyDetail2'),
+  t('booking.cancelPolicyDetail3'),
+  t('booking.cancelPolicyDetail4'),
+  t('booking.cancelPolicyDetail5'),
+])
 
 // sessionStorage key for form persistence
 const STORAGE_KEY = `booking_form_${productId || 'default'}`
@@ -316,7 +318,7 @@ const showCancelPolicy = ref(false)
 async function loadProductData() {
   if (!productId || !packageId) {
     loading.value = false
-    loadError.value = '缺少产品参数，请从产品详情页进入'
+    loadError.value = t('booking.missingParams')
     return
   }
   try {
@@ -324,7 +326,7 @@ async function loadProductData() {
       getProductDetail(productId),
       getProductPackages(productId),
     ])
-    productTitle.value = product.title || '旅游产品'
+    productTitle.value = product.title || t('booking.defaultProduct')
     currency.value = product.currency || 'AED'
 
     const pkg = (pkgResp.items || []).find(p => p.id === packageId)
@@ -359,41 +361,43 @@ async function loadProductData() {
     }
   } catch (e) {
     console.error('加载产品信息失败', e)
-    loadError.value = '加载产品信息失败，请返回重试'
+    loadError.value = t('booking.loadProductFailed')
   } finally {
     loading.value = false
   }
 }
 
 /** 证件类型选项 */
-const ID_TYPES = [
-  { value: 'passport', label: '护照' },
-  { value: 'id_card', label: '身份证' },
-  { value: 'other_id', label: '其他证件' },
-]
+const ID_TYPES = ['passport', 'id_card', 'other_id']
 
 function idTypeLabel(val) {
-  return ID_TYPES.find(t => t.value === val)?.label || '护照'
+  const key = 'booking.idTypes.' + (val || 'passport')
+  return te(key) ? t(key) : (val || '')
 }
 
 /** 点击循环切换证件类型 */
 function cycleIdType(idx) {
-  const cur = ID_TYPES.findIndex(t => t.value === travelers.value[idx].idType)
+  const cur = ID_TYPES.indexOf(travelers.value[idx].idType)
   const next = (cur + 1) % ID_TYPES.length
-  travelers.value[idx].idType = ID_TYPES[next].value
+  travelers.value[idx].idType = ID_TYPES[next]
 }
 
 /** 姓名语言标签 */
-const LANG_MAP = { zh: '中', en: '英', ar: '阿' }
-function langLabel(lang) { return LANG_MAP[lang] || lang }
+function langLabel(lang) {
+  const key = 'booking.nameLang.' + lang
+  return te(key) ? t(key) : lang
+}
 function nameLangLabel(lang) {
-  return { zh: '中文', en: '英文', ar: '阿拉伯文' }[lang] || '中文'
+  const key = 'booking.nameLangFull.' + (lang || 'zh')
+  return te(key) ? t(key) : (lang || '')
 }
 function namePlaceholder(lang) {
-  return { zh: '请与证件姓名一致', en: 'As shown on ID', ar: 'كما في جواز السفر' }[lang] || ''
+  const key = 'booking.namePh.' + (lang || 'zh')
+  return te(key) ? t(key) : ''
 }
 function idNumberPlaceholder(type) {
-  return { passport: '请填写护照号', id_card: '请填写身份证号', other_id: '请填写证件号码' }[type] || '请填写证件号码'
+  const key = 'booking.idNumberPh.' + (type || 'other_id')
+  return te(key) ? t(key) : ''
 }
 
 /** 游客列表 — 初始根据 qty 生成对应数量，随 qty 联动 */
@@ -499,11 +503,6 @@ const canSubmit = computed(() => {
   return travelers.value.every(t => t.name.trim() !== '')
 })
 
-function formatPrice(v) {
-  if (v == null) return '--'
-  return String(v)
-}
-
 function goBackToProduct() {
   if (productId) {
     router.push({ name: 'ProductDetail', params: { id: productId } })
@@ -582,7 +581,7 @@ function selectSavedTraveler(st) {
     t => t.name.trim() && t.name === st.name && t.idNumber === st.idNumber
   )
   if (duplicate) {
-    error.value = `出行人「${st.name}」已在列表中，请勿重复添加`
+    error.value = t('booking.duplicateTraveler', { name: st.name })
     return
   }
   if (travelers.value.length === 1 && !travelers.value[0].name) {
@@ -604,11 +603,11 @@ function deleteSavedTraveler(id) {
   saveSavedTravelers()
 }
 function cycleFormIdType() {
-  const cur = ID_TYPES.findIndex(t => t.value === travelerForm.value.idType)
-  travelerForm.value.idType = ID_TYPES[(cur + 1) % ID_TYPES.length].value
+  const cur = ID_TYPES.indexOf(travelerForm.value.idType)
+  travelerForm.value.idType = ID_TYPES[(cur + 1) % ID_TYPES.length]
 }
 function saveTravelerForm() {
-  if (!travelerForm.value.name.trim()) { error.value = '请输入出行人姓名'; return }
+  if (!travelerForm.value.name.trim()) { error.value = t('booking.nameRequired'); return }
   if (editingTravelerIdx.value >= 0) {
     savedTravelers.value[editingTravelerIdx.value] = { ...travelerForm.value }
   } else {
@@ -635,8 +634,8 @@ function deleteSavedContact(id) {
   saveSavedContacts()
 }
 function saveContactForm() {
-  if (!contactForm.value.name.trim()) { error.value = '请输入联系人姓名'; return }
-  if (!contactForm.value.email.trim()) { error.value = '请输入联系人邮箱'; return }
+  if (!contactForm.value.name.trim()) { error.value = t('booking.contactNameRequired'); return }
+  if (!contactForm.value.email.trim()) { error.value = t('booking.contactEmailRequired'); return }
   if (editingContactIdx.value >= 0) {
     savedContacts.value[editingContactIdx.value] = { ...contactForm.value }
   } else {
@@ -665,30 +664,34 @@ async function submitOrder() {
       customerEmail: contact.value.email,
       customerName: contact.value.name,
       customerPhone: contact.value.phone,
-      travelers: travelers.value.map(t => ({
-        name: t.name,
-        idType: t.idType,
-        idNumber: t.idNumber,
-        phone: t.phone,
+      travelers: travelers.value.map(tr => ({
+        name: tr.name,
+        idType: tr.idType,
+        idNumber: tr.idNumber,
+        phone: tr.phone,
       })),
       remark: remark.value,
       reservationKey: generateReservationKey(),
+      // 用户当前选择的展示币种，后端 P2 据此锁定汇率
+      displayCurrency: selectedCurrency.value,
     })
     // Clear saved form data on successful order
     sessionStorage.removeItem(STORAGE_KEY)
     // Save travelers and contact to saved lists for future use
     autoSaveTravelersAndContact()
-    // 跳转到支付页
+    // 跳转到支付页（优先透传后端锁定的展示金额/币种）
     router.push({
       name: 'Payment',
       query: {
         orderNo: resp.orderNo,
         totalAmount: resp.totalAmount,
         currency: resp.currency,
+        displayAmount: resp.displayAmount,
+        displayCurrency: resp.displayCurrency,
       },
     })
   } catch (e) {
-    error.value = e.message || '下单失败，请重试'
+    error.value = e.message || t('booking.orderFailed')
   } finally {
     submitting.value = false
   }

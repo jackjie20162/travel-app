@@ -1,57 +1,57 @@
 <template>
   <div class="page-auth">
     <div class="auth-header">
-      <h1>{{ isRegister ? '创建账户' : '欢迎回来' }}</h1>
-      <p class="muted">Global Dubai Travel</p>
+      <h1>{{ isRegister ? t('auth.createAccount') : t('auth.welcomeBack') }}</h1>
+      <p class="muted">{{ t('profile.subtitle') }}</p>
     </div>
 
     <form class="auth-form" @submit.prevent="handleSubmit">
       <!-- 注册额外字段 -->
       <template v-if="isRegister">
         <div class="form-group">
-          <label>用户名</label>
-          <input v-model="form.username" placeholder="请输入用户名" required />
+          <label>{{ t('auth.username') }}</label>
+          <input v-model="form.username" :placeholder="t('auth.usernamePh')" required />
         </div>
         <div class="form-group">
-          <label>昵称</label>
-          <input v-model="form.nickname" placeholder="可选" />
+          <label>{{ t('auth.nickname') }}</label>
+          <input v-model="form.nickname" :placeholder="t('common.optional')" />
         </div>
         <div class="form-group">
-          <label>密码</label>
-          <input v-model="form.password" type="password" placeholder="请设置密码" required />
+          <label>{{ t('auth.password') }}</label>
+          <input v-model="form.password" type="password" :placeholder="t('auth.passwordPh')" required />
         </div>
       </template>
 
       <div class="form-group">
-        <label>邮箱</label>
-        <input v-model="form.email" type="email" placeholder="请输入邮箱" required />
+        <label>{{ t('auth.email') }}</label>
+        <input v-model="form.email" type="email" :placeholder="t('auth.emailPh')" required />
       </div>
 
       <!-- 注册额外字段 -->
       <div v-if="isRegister" class="form-group">
-        <label>手机号</label>
-        <input v-model="form.mobile" type="tel" placeholder="可选" />
+        <label>{{ t('auth.mobile') }}</label>
+        <input v-model="form.mobile" type="tel" :placeholder="t('common.optional')" />
       </div>
 
       <!-- 图形验证码 -->
       <div class="form-group">
-        <label>图形验证码</label>
+        <label>{{ t('auth.captcha') }}</label>
         <div class="captcha-row">
-          <input v-model="form.captchaAnswer" placeholder="请输入验证码" required />
-          <div class="captcha-img" @click="refreshCaptcha" title="点击刷新">
+          <input v-model="form.captchaAnswer" :placeholder="t('auth.captchaPh')" required />
+          <div class="captcha-img" @click="refreshCaptcha" :title="t('auth.clickRefresh')">
             <img v-if="captchaSrc" :src="captchaSrc" alt="captcha" />
-            <span v-else>点击获取</span>
+            <span v-else>{{ t('auth.clickGet') }}</span>
           </div>
         </div>
       </div>
 
       <!-- 邮件验证码 -->
       <div class="form-group">
-        <label>邮件验证码</label>
+        <label>{{ t('auth.emailCode') }}</label>
         <div class="captcha-row">
-          <input v-model="form.emailCode" placeholder="请输入邮件验证码" required />
+          <input v-model="form.emailCode" :placeholder="t('auth.emailCodePh')" required />
           <button type="button" class="btn-send-code" :disabled="codeCooldown > 0 || sendingCode" @click="handleSendCode">
-            {{ sendingCode ? '发送中…' : (codeCooldown > 0 ? `${codeCooldown}s` : '发送验证码') }}
+            {{ sendingCode ? t('auth.sending') : (codeCooldown > 0 ? `${codeCooldown}s` : t('auth.sendCode')) }}
           </button>
         </div>
       </div>
@@ -59,14 +59,14 @@
       <div v-if="error" class="auth-error">{{ error }}</div>
 
       <button class="btn-primary auth-submit" type="submit" :disabled="loading">
-        {{ loading ? '请稍候…' : (isRegister ? '注册' : '登录') }}
+        {{ loading ? t('common.pleaseWait') : (isRegister ? t('auth.register') : t('auth.login')) }}
       </button>
     </form>
 
     <div class="auth-switch">
-      <span>{{ isRegister ? '已有账户？' : '还没有账户？' }}</span>
+      <span>{{ isRegister ? t('auth.hasAccount') : t('auth.noAccount') }}</span>
       <a href="#" @click.prevent="isRegister = !isRegister">
-        {{ isRegister ? '去登录' : '注册新账户' }}
+        {{ isRegister ? t('auth.goLogin') : t('auth.registerNew') }}
       </a>
     </div>
   </div>
@@ -76,10 +76,12 @@
 import { ref, reactive, onMounted, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useUser } from '../composables/user.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const router = useRouter()
 const route = useRoute()
 const { login, register, fetchCaptcha, sendEmailCode } = useUser()
+const { t } = useLocale()
 
 const isRegister = ref(route.query.mode === 'register')
 const loading = ref(false)
@@ -118,7 +120,7 @@ async function refreshCaptcha() {
     const base64 = btoa(String.fromCharCode(...bytes))
     captchaSrc.value = 'data:image/svg+xml;base64,' + base64
   } catch (e) {
-    error.value = '获取验证码失败'
+    error.value = t('auth.captchaFailed')
     captchaSrc.value = ''
   }
 }
@@ -127,11 +129,11 @@ async function handleSendCode() {
   error.value = ''
   const email = form.email
   if (!email) {
-    error.value = '请先输入邮箱地址'
+    error.value = t('auth.emailRequired')
     return
   }
   if (!form.captchaId || !form.captchaAnswer) {
-    error.value = '请先输入图形验证码'
+    error.value = t('auth.captchaRequired')
     return
   }
   sendingCode.value = true
@@ -145,7 +147,7 @@ async function handleSendCode() {
     refreshCaptcha()
     form.captchaAnswer = ''
   } catch (e) {
-    error.value = e.message || '发送验证码失败'
+    error.value = e.message || t('auth.sendCodeFailed')
     refreshCaptcha()
     form.captchaAnswer = ''
   } finally {
@@ -190,7 +192,7 @@ async function handleSubmit() {
     const redirect = route.query.redirect || '/profile'
     router.replace(redirect)
   } catch (e) {
-    error.value = e.message || '操作失败，请重试'
+    error.value = e.message || t('auth.operationFailed')
     refreshCaptcha()
     form.captchaAnswer = ''
   } finally {

@@ -1,36 +1,36 @@
 <template>
   <div class="page-explore">
-    <h2>探索迪拜体验</h2>
+    <h2>{{ t('explore.title') }}</h2>
 
     <!-- 搜索 & 筛选 -->
     <div class="filter-bar">
-      <input v-model="keyword" placeholder="搜索关键词" @keyup.enter="load"/>
+      <input v-model="keyword" :placeholder="t('explore.searchPlaceholder')" @keyup.enter="load"/>
       <select v-model="destination" @change="load">
-        <option value="">全部目的地</option>
+        <option value="">{{ t('explore.allDestinations') }}</option>
         <option v-for="d in destOptions" :key="d" :value="d">{{ d }}</option>
       </select>
     </div>
 
     <!-- AI 推荐提示 -->
     <div v-if="route.query.ai" class="ai-hint">
-      <b>✨ AI 推荐</b>
-      <span>根据你的偏好（{{ route.query.keyword }}）、{{ route.query.days }}天、预算 {{ route.query.budget }} AED 筛选</span>
+      <b>{{ t('explore.aiRecommend') }}</b>
+      <span>{{ t('explore.aiHint', { keyword: route.query.keyword, days: route.query.days, budget: route.query.budget }) }}</span>
     </div>
 
     <!-- 结果列表 -->
-    <div v-if="loading" class="center">加载中…</div>
-    <div v-else-if="!products.length" class="center empty">没有找到匹配的商品</div>
+    <div v-if="loading" class="center">{{ t('common.loading') }}</div>
+    <div v-else-if="!products.length" class="center empty">{{ t('explore.noResults') }}</div>
     <div v-else class="product-list">
       <div v-for="p in products" :key="p.id" class="list-item" @click="goProduct(p)">
         <div class="item-icon">{{ destEmoji(p.destination) }}</div>
         <div class="item-info">
           <h3>{{ p.title }}</h3>
           <small>{{ p.destination || 'Dubai' }} · {{ p.code }}</small>
-          <p>{{ p.description || '迪拜精彩体验' }}</p>
+          <p>{{ p.description || t('explore.defaultDesc') }}</p>
         </div>
         <div class="item-price">
-          <strong>{{ p.currency || 'AED' }} {{ formatPrice(p.minPrice) }}</strong>
-          <small>起</small>
+          <strong>{{ formatPrice(p.minPrice) }}</strong>
+          <small>{{ t('explore.from') }}</small>
         </div>
       </div>
     </div>
@@ -41,9 +41,11 @@
 import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getProducts } from '../api.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const route = useRoute()
 const router = useRouter()
+const { t, formatPrice } = useLocale()
 
 const keyword = ref(route.query.keyword || '')
 const destination = ref(route.query.destination || '')
@@ -55,11 +57,6 @@ const destOptions = ['Dubai', 'Abu Dhabi', 'Desert', 'Marina', 'Culture']
 function destEmoji(dest) {
   const map = { 'desert': '🏜️', 'abu dhabi': '🕌', 'marina': '⛵', 'culture': '🎭' }
   return map[(dest || '').toLowerCase()] || '🏙️'
-}
-
-function formatPrice(v) {
-  if (v == null || v <= 0) return '--'
-  return String(v)
 }
 
 function goProduct(p) {

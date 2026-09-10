@@ -3,6 +3,7 @@
  * 提供登录状态、用户信息、登录/登出操作，跨组件共享。
  */
 import { ref, computed } from 'vue'
+import { i18n } from '../locales/index.js'
 import {
   getToken, setToken, clearToken,
   getStoredUser, setStoredUser,
@@ -28,7 +29,7 @@ export function useUser() {
     const resp = await apiLogin({ email, captchaId, captchaAnswer, emailCode })
     const data = resp.data || resp
     if (!data.token) {
-      throw new Error('登录失败：未返回有效凭证')
+      throw new Error(i18n.global.t('auth.loginNoToken'))
     }
     authToken.value = data.token
     currentUser.value = data.user
@@ -41,7 +42,7 @@ export function useUser() {
     const resp = await apiRegister({ username, password, email, mobile, nickname, captchaId, captchaAnswer, emailCode })
     const data = resp.data || resp
     if (!data.token) {
-      throw new Error('注册失败：未返回有效凭证')
+      throw new Error(i18n.global.t('auth.registerNoToken'))
     }
     authToken.value = data.token
     currentUser.value = data.user

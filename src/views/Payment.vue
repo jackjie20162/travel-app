@@ -1,27 +1,27 @@
 <template>
   <div class="page-payment">
-    <h2>订单支付</h2>
+    <h2>{{ t('payment.title') }}</h2>
 
     <!-- 订单信息 -->
     <section class="payment-summary">
       <div class="summary-row">
-        <span>订单号</span><span class="mono">{{ orderNo }}</span>
+        <span>{{ t('payment.orderNo') }}</span><span class="mono">{{ orderNo }}</span>
       </div>
       <div class="summary-row total">
-        <span>应付金额</span>
-        <strong>{{ currency }} {{ formatPrice(totalAmount) }}</strong>
+        <span>{{ t('payment.amountDue') }}</span>
+        <strong>{{ payAmountText }}</strong>
       </div>
     </section>
 
     <!-- 支付方式 -->
     <section class="payment-section">
-      <h3>选择支付方式</h3>
+      <h3>{{ t('payment.selectMethod') }}</h3>
       <div class="pay-methods">
         <div class="pay-method" :class="{ selected: provider === 'paypal' }" @click="provider = 'paypal'">
           <span class="pay-icon">💳</span>
           <div>
-            <h4>PayPal</h4>
-            <small>国际信用卡 / PayPal 余额</small>
+            <h4>{{ t('payment.paypal') }}</h4>
+            <small>{{ t('payment.paypalDesc') }}</small>
           </div>
         </div>
       </div>
@@ -30,7 +30,7 @@
     <!-- 操作 -->
     <div class="payment-action">
       <button class="btn-primary" :disabled="paying" @click="pay">
-        {{ paying ? '处理中…' : `立即支付 ${currency} ${formatPrice(totalAmount)}` }}
+        {{ paying ? t('common.processing') : t('payment.payNow', { amount: payAmountText }) }}
       </button>
     </div>
 
@@ -39,25 +39,31 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createPayment } from '../api.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const route = useRoute()
 const router = useRouter()
+const { t, formatPrice, formatAmount } = useLocale()
 
 const orderNo = route.query.orderNo || ''
 const totalAmount = parseInt(route.query.totalAmount) || 0
-const currency = route.query.currency || 'AED'
+// P2 下单锁汇后由 Booking 透传 displayAmount/displayCurrency；未就绪时回退按基准币换算。
+const lockedAmount = route.query.displayAmount
+const lockedCurrency = route.query.displayCurrency
 
 const provider = ref('paypal')
 const paying = ref(false)
 const error = ref('')
 
-function formatPrice(v) {
-  if (v == null) return '--'
-  return String(v)
-}
+const payAmountText = computed(() => {
+  if (lockedAmount != null && lockedCurrency) {
+    return formatAmount(Number(lockedAmount), lockedCurrency)
+  }
+  return formatPrice(totalAmount)
+})
 
 function generateIdempotencyKey() {
   return `pay_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
@@ -81,7 +87,7 @@ async function pay() {
       router.push({ name: 'OrderSuccess', params: { orderNo } })
     }
   } catch (e) {
-    error.value = e.message || '支付发起失败，请重试'
+    error.value = e.message || t('payment.payFailed')
   } finally {
     paying.value = false
   }

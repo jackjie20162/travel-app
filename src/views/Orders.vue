@@ -1,6 +1,6 @@
 <template>
   <div class="page-orders">
-    <h2>我的订单</h2>
+    <h2>{{ t('order.myOrders') }}</h2>
 
     <!-- Tab 栏 -->
     <div class="order-tabs">
@@ -11,7 +11,7 @@
         :class="{ active: activeTab === tab.value }"
         @click="switchTab(tab.value)"
       >
-        <span>{{ tab.label }}</span>
+        <span>{{ t(tab.labelKey) }}</span>
         <span v-if="badges[tab.value]" class="tab-badge">{{ badges[tab.value] > 99 ? '99+' : badges[tab.value] }}</span>
       </div>
     </div>
@@ -19,13 +19,13 @@
     <!-- 加载中 -->
     <div v-if="loading && !orders.length" class="center">
       <div class="spinner"></div>
-      <p>加载中…</p>
+      <p>{{ t('common.loading') }}</p>
     </div>
 
     <!-- 空状态 -->
     <div v-else-if="!orders.length" class="center empty">
-      <p>暂无订单记录</p>
-      <router-link to="/" class="link">去浏览商品 →</router-link>
+      <p>{{ t('order.empty') }}</p>
+      <router-link to="/" class="link">{{ t('order.goBrowse') }}</router-link>
     </div>
 
     <!-- 订单列表 -->
@@ -37,17 +37,17 @@
         </div>
         <div class="order-body">
           <div class="order-info">
-            <small>{{ o.customerEmail || '旅游订单' }}</small>
+            <small>{{ o.customerEmail || t('order.travelOrder') }}</small>
           </div>
-          <strong>{{ o.currency || 'AED' }} {{ formatPrice(o.totalAmount) }}</strong>
+          <strong>{{ orderAmount(o) }}</strong>
         </div>
       </div>
     </div>
 
     <!-- 加载更多 -->
     <div v-if="orders.length && orders.length < total" class="load-more" @click="loadMore">
-      <span v-if="!loadingMore">加载更多</span>
-      <span v-else class="muted">加载中…</span>
+      <span v-if="!loadingMore">{{ t('order.loadMore') }}</span>
+      <span v-else class="muted">{{ t('common.loading') }}</span>
     </div>
   </div>
 </template>
@@ -56,8 +56,10 @@
 import { ref, reactive, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { getMyOrders } from '../api.js'
+import { useLocale } from '../composables/useLocale.js'
 
 const router = useRouter()
+const { t, te, formatPrice, formatAmount } = useLocale()
 const orders = ref([])
 const loading = ref(false)
 const loadingMore = ref(false)
@@ -67,34 +69,25 @@ const total = ref(0)
 const badges = reactive({ PENDING_PAYMENT: 0, PENDING_ACCEPTANCE: 0 })
 
 const tabs = [
-  { value: '', label: '全部' },
-  { value: 'PENDING_PAYMENT', label: '待支付' },
-  { value: 'PENDING_ACCEPTANCE', label: '待接单' },
-  { value: 'PENDING_VERIFY', label: '待核销' },
-  { value: 'COMPLETED', label: '已完成' },
-  { value: 'CANCELLED', label: '已取消' },
+  { value: '', labelKey: 'order.tabAll' },
+  { value: 'PENDING_PAYMENT', labelKey: 'status.PENDING_PAYMENT' },
+  { value: 'PENDING_ACCEPTANCE', labelKey: 'status.PENDING_ACCEPTANCE' },
+  { value: 'PENDING_VERIFY', labelKey: 'status.PENDING_VERIFY' },
+  { value: 'COMPLETED', labelKey: 'status.COMPLETED' },
+  { value: 'CANCELLED', labelKey: 'status.CANCELLED' },
 ]
 
-const statusMap = {
-  PENDING_PAYMENT: '待支付',
-  PAYMENT_PROCESSING: '支付处理中',
-  PENDING_ACCEPTANCE: '待接单',
-  PENDING_VERIFY: '待核销',
-  VERIFIED: '已核销',
-  PENDING_REFUND: '退款中',
-  CONFIRMED: '已确认',
-  COMPLETED: '已完成',
-  CANCELLED: '已取消',
-  REFUNDED: '已退款',
-}
-
 function statusText(s) {
-  return statusMap[s] || s || '未知'
+  if (!s) return t('status.UNKNOWN')
+  return te('status.' + s) ? t('status.' + s) : s
 }
 
-function formatPrice(v) {
-  if (v == null) return '--'
-  return String(v)
+/** 优先展示下单锁定的金额/币种；无锁定值时按当前币种换算基准金额。 */
+function orderAmount(o) {
+  if (o && o.displayAmount != null && o.displayCurrency) {
+    return formatAmount(o.displayAmount, o.displayCurrency)
+  }
+  return formatPrice(o?.totalAmount)
 }
 
 async function loadOrders(append = false) {

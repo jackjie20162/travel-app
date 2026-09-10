@@ -383,7 +383,7 @@ const route = useRoute()
 const router = useRouter()
 const { isFav, toggle } = useFavorites()
 const user = useUser()
-const { t, te, formatPrice } = useLocale()
+const { t, te, formatPrice, locale } = useLocale()
 
 const product = ref(null)
 const packages = ref([])
@@ -629,11 +629,8 @@ function selectDate(dateStr) {
     const cells = strip.querySelectorAll('.date-cell:not(.more-dates)')
     const idx = dateStrip.value.findIndex(d => d.dateStr === dateStr)
     if (idx >= 0 && cells[idx]) {
-      const cell = cells[idx]
-      const cellLeft = cell.offsetLeft
-      const cellWidth = cell.offsetWidth
-      const stripWidth = strip.offsetWidth
-      strip.scrollTo({ left: cellLeft - stripWidth / 2 + cellWidth / 2, behavior: 'smooth' })
+      // 用 scrollIntoView 居中，天然适配 LTR/RTL（dir=rtl 下 offsetLeft/scrollLeft 语义相反）
+      cells[idx].scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
     }
   })
 }
@@ -650,11 +647,8 @@ function selectDateFromCal(dateStr) {
     const cells = strip.querySelectorAll('.date-cell:not(.more-dates)')
     const idx = dateStrip.value.findIndex(d => d.dateStr === dateStr)
     if (idx >= 0 && cells[idx]) {
-      const cell = cells[idx]
-      const cellLeft = cell.offsetLeft
-      const cellWidth = cell.offsetWidth
-      const stripWidth = strip.offsetWidth
-      strip.scrollTo({ left: cellLeft - stripWidth / 2 + cellWidth / 2, behavior: 'smooth' })
+      // 用 scrollIntoView 居中，天然适配 LTR/RTL（dir=rtl 下 offsetLeft/scrollLeft 语义相反）
+      cells[idx].scrollIntoView({ inline: 'center', block: 'nearest', behavior: 'smooth' })
     }
   })
 }
@@ -871,6 +865,8 @@ function goSupport() {
 }
 
 onMounted(loadProduct)
+// 切换语言后重新拉取，获取后端按 locale 返回的翻译文案
+watch(locale, () => loadProduct())
 </script>
 
 <style scoped>

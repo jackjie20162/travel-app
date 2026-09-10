@@ -315,6 +315,6 @@ async function handleSubmit() {
 .auth-switch a {
   color: #2563eb;
   font-weight: 600;
-  margin-left: 4px;
+  margin-inline-start: 4px;
 }
 </style>

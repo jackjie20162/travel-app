@@ -84,7 +84,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { getProducts } from '../api.js'
 import { useFavorites } from '../composables/favorites.js'
@@ -92,7 +92,7 @@ import { useLocale } from '../composables/useLocale.js'
 
 const router = useRouter()
 const { isFav, toggle } = useFavorites()
-const { t, formatPrice } = useLocale()
+const { t, formatPrice, locale } = useLocale()
 
 const keyword = ref('')
 const products = ref([])
@@ -154,4 +154,6 @@ function startPlanner() {
 }
 
 onMounted(loadProducts)
+// 切换语言后重新拉取，获取后端按 locale 返回的翻译文案
+watch(locale, () => loadProducts())
 </script>

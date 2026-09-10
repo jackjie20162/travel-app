@@ -772,7 +772,7 @@ async function submitOrder() {
   font-size: 13px;
   font-weight: 400;
   color: #64748b;
-  margin-left: 6px;
+  margin-inline-start: 6px;
 }
 .btn-add-traveler {
   background: #eff6ff;
@@ -860,7 +860,7 @@ async function submitOrder() {
 .row-value .arrow {
   font-size: 18px;
   color: #94a3b8;
-  margin-left: 2px;
+  margin-inline-start: 2px;
 }
 
 /* ── 行内输入框包裹 ── */
@@ -875,7 +875,7 @@ async function submitOrder() {
   border: none;
   outline: none;
   font-size: 14px;
-  text-align: right;
+  text-align: end;
   background: transparent;
   color: #1e293b;
   max-width: 200px;
@@ -986,7 +986,7 @@ async function submitOrder() {
   font-size: 18px;
   font-weight: 700;
   color: #f97316;
-  margin-right: 4px;
+  margin-inline-end: 4px;
 }
 .stepper-btn {
   width: 30px;
@@ -1122,7 +1122,7 @@ async function submitOrder() {
   display: flex;
   gap: 8px;
   flex-shrink: 0;
-  margin-left: 8px;
+  margin-inline-start: 8px;
 }
 .btn-saved-edit {
   background: none;
@@ -1163,7 +1163,7 @@ async function submitOrder() {
   border: none;
   outline: none;
   font-size: 14px;
-  text-align: right;
+  text-align: end;
   background: transparent;
   color: #1e293b;
   max-width: 220px;

@@ -45,7 +45,7 @@ import { useLocale } from '../composables/useLocale.js'
 
 const route = useRoute()
 const router = useRouter()
-const { t, formatPrice } = useLocale()
+const { t, formatPrice, locale } = useLocale()
 
 const keyword = ref(route.query.keyword || '')
 const destination = ref(route.query.destination || '')
@@ -86,4 +86,6 @@ watch(() => route.query, (q) => {
 })
 
 onMounted(load)
+// 切换语言后重新拉取，获取后端按 locale 返回的翻译文案
+watch(locale, () => load())
 </script>

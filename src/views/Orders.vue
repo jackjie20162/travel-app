@@ -189,8 +189,8 @@ onMounted(() => {
 }
 .tab-badge {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  inset-block-start: 2px;
+  inset-inline-end: 2px;
   min-width: 16px;
   height: 16px;
   line-height: 16px;

@@ -234,7 +234,7 @@ onMounted(loadOrder)
   border-color: #4a90d9;
 }
 .char-count {
-  text-align: right;
+  text-align: end;
   font-size: 12px;
   color: #999;
   margin-top: 4px;
@@ -272,8 +272,8 @@ onMounted(loadOrder)
 }
 .remove-img {
   position: absolute;
-  top: 2px;
-  right: 2px;
+  inset-block-start: 2px;
+  inset-inline-end: 2px;
   width: 20px;
   height: 20px;
   border-radius: 50%;

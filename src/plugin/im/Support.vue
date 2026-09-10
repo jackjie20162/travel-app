@@ -554,7 +554,7 @@ onUnmounted(() => client && client.close())
   margin-top: 4px;
   font-size: 10px;
   color: #94a3b8;
-  text-align: right;
+  text-align: end;
 }
 .msg.out .bubble-time {
   color: rgba(255, 255, 255, 0.6);

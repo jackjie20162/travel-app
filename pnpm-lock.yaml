@@ -8,6 +8,9 @@ importers:
 
   .:
     dependencies:
+      '@stripe/stripe-js':
+        specifier: ^9.16.0
+        version: 9.16.0
       '@tauri-apps/api':
         specifier: ^2.11.0
         version: 2.11.1
@@ -166,6 +169,10 @@ packages:
 
   '@rolldown/pluginutils@1.0.1':
     resolution: {integrity: sha512-2j9bGt5Jh8hj+vPtgzPtl72j0yRxHAyumoo6TNfAjsLB04UtpSvPbPcDcBMxz7n+9CYB0c1GxQFxYRg2jimqGw==}
+
+  '@stripe/stripe-js@9.16.0':
+    resolution: {integrity: sha512-PNZmy9hbuiuiyjAsigMlQChzJqrNEzQUtYIL/z5w0dsx27Ha69SBTYa2o8/M0Hbfiz9V2qctqX2DBd5sa57qoA==}
+    engines: {node: '>=12.16'}
 
   '@tauri-apps/api@2.11.1':
     resolution: {integrity: sha512-M2FPuYND2m+wh5hfW9ZpSdxMPdEJovPBWwoHJmwUpysTYNHaOkVFN419m/K0LIgjb/7KU2vBgsUepJWugQCvAA==}
@@ -557,6 +564,8 @@ snapshots:
     optional: true
 
   '@rolldown/pluginutils@1.0.1': {}
+
+  '@stripe/stripe-js@9.16.0': {}
 
   '@tauri-apps/api@2.11.1': {}
 

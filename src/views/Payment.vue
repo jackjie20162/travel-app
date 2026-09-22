@@ -24,11 +24,27 @@
             <small>{{ t('payment.paypalDesc') }}</small>
           </div>
         </div>
+        <div class="pay-method" :class="{ selected: provider === 'stripe' }" @click="provider = 'stripe'">
+          <span class="pay-icon">💎</span>
+          <div>
+            <h4>{{ t('payment.stripe') }}</h4>
+            <small>{{ t('payment.stripeDesc') }}</small>
+          </div>
+        </div>
       </div>
     </section>
 
-    <!-- 操作 -->
-    <div class="payment-action">
+    <!-- Stripe 内嵌支付表单 -->
+    <StripePaymentForm
+      v-if="provider === 'stripe'"
+      :order-no="orderNo"
+      :pay-amount-text="payAmountText"
+      @success="onStripeSuccess"
+      @error="onStripeError"
+    />
+
+    <!-- PayPal 操作按钮 -->
+    <div v-if="provider === 'paypal'" class="payment-action">
       <button class="btn-primary" :disabled="paying" @click="pay">
         {{ paying ? t('common.processing') : t('payment.payNow', { amount: payAmountText }) }}
       </button>
@@ -43,6 +59,7 @@ import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { createPayment } from '../api.js'
 import { useLocale } from '../composables/useLocale.js'
+import StripePaymentForm from './StripePaymentForm.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -67,6 +84,14 @@ const payAmountText = computed(() => {
 
 function generateIdempotencyKey() {
   return `pay_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`
+}
+
+function onStripeSuccess() {
+  // StripePaymentForm already navigates on success
+}
+
+function onStripeError(e) {
+  error.value = e.message || t('payment.payFailed')
 }
 
 async function pay() {

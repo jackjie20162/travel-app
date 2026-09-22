@@ -196,6 +196,14 @@ export function capturePaypalPayment(queryString) {
   return request(`/api/travel/payments/paypal/return${queryString ? '?' + queryString : ''}`)
 }
 
+/** Stripe：创建 PaymentIntent，返回 clientSecret + publishableKey */
+export function createStripeIntent({ orderNo, idempotencyKey }) {
+  return request('/api/travel/payments/stripe/intent', {
+    method: 'POST',
+    body: JSON.stringify({ orderNo, provider: 'stripe', idempotencyKey }),
+  })
+}
+
 /* ── 用户认证 ── */
 
 export function getToken() {

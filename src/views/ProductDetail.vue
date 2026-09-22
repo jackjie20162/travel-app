@@ -7,11 +7,13 @@
       <!-- 1. 图片轮播 -->
       <div class="detail-carousel">
         <div class="carousel-main" @click="showAlbum = true">
-          <img v-if="product.coverImage" :src="product.coverImage" class="carousel-img" alt=""/>
+          <img v-if="currentImage" :src="currentImage" class="carousel-img" alt=""/>
           <div v-else class="carousel-placeholder">
             <span class="cover-emoji-lg">{{ destEmoji(product.destination) }}</span>
           </div>
-          <div class="carousel-counter">1/{{ allImages.length }}</div>
+          <button v-if="allImages.length > 1" class="carousel-nav prev" @click.stop="prevImage">‹</button>
+          <button v-if="allImages.length > 1" class="carousel-nav next" @click.stop="nextImage">›</button>
+          <div v-if="allImages.length" class="carousel-counter">{{ carouselIndex + 1 }}/{{ allImages.length }}</div>
         </div>
         <div class="carousel-tabs">
           <span class="carousel-tab active">{{ t('product.tabCover') }}</span>
@@ -76,6 +78,18 @@
         </div>
         <div v-if="highlightList.length > 2" class="highlights-more" @click="highlightsExpanded = !highlightsExpanded">
           {{ highlightsExpanded ? t('common.collapse') : t('common.more') }} &gt;
+        </div>
+      </div>
+
+      <!-- 7.5 宣传视频 -->
+      <div v-if="hasVideo" class="detail-video-card">
+        <div class="video-header">
+          <h3>{{ t('product.productVideo') }}</h3>
+          <span class="video-emoji">🎬</span>
+        </div>
+        <video v-if="!videoIsHls" class="detail-video" :src="videoUrl" controls playsinline preload="metadata"></video>
+        <div v-else class="video-hls-note">
+          <a :href="videoUrl" target="_blank" rel="noopener">{{ t('product.productVideo') }} ▶</a>
         </div>
       </div>
 
@@ -398,6 +412,7 @@ const highlightsExpanded = ref(false)
 const showBookingModal = ref(false)
 const showCalendar = ref(false)
 const showAlbum = ref(false)
+const carouselIndex = ref(0)
 const dateStripRef = ref(null)
 const reviewsSection = ref(null)
 
@@ -429,17 +444,50 @@ const allImages = computed(() => {
   if (!product.value) return []
   const imgs = []
   if (product.value.coverImage) imgs.push(product.value.coverImage)
-  if (product.value.images) {
-    product.value.images.split(',').map(s => s.trim()).filter(Boolean).forEach(img => {
-      if (!imgs.includes(img)) imgs.push(img)
-    })
-  }
+  parseMediaList(product.value.images).forEach(img => {
+    if (!imgs.includes(img)) imgs.push(img)
+  })
   return imgs
 })
 
+// 当前轮播主图
+const currentImage = computed(() => allImages.value[carouselIndex.value] || product.value?.coverImage || '')
+
+function prevImage() {
+  const n = allImages.value.length
+  if (n <= 1) return
+  carouselIndex.value = (carouselIndex.value - 1 + n) % n
+}
+
+function nextImage() {
+  const n = allImages.value.length
+  if (n <= 1) return
+  carouselIndex.value = (carouselIndex.value + 1) % n
+}
+
+// 宣传视频：mp4 直链直接播放；HLS(.m3u8) 降级为外链打开
+const videoUrl = computed(() => product.value?.videoUrl || product.value?.video_url || '')
+const hasVideo = computed(() => !!videoUrl.value)
+const videoIsHls = computed(() => /\.m3u8($|\?)/i.test(videoUrl.value))
+
+// 解析媒体列表：兼容 JSON 数组字符串(["url"]/[{"text":}])、逗号分隔、原生数组
+function parseMediaList(raw) {
+  if (!raw) return []
+  const norm = (x) => (typeof x === 'string' ? x : ((x && (x.url || x.text)) || ''))
+  if (Array.isArray(raw)) return raw.map(norm).filter(Boolean)
+  const s = String(raw).trim()
+  if (s.startsWith('[')) {
+    try {
+      const arr = JSON.parse(s)
+      if (Array.isArray(arr)) return arr.map(norm).filter(Boolean)
+    } catch { /* 落回逗号解析 */ }
+  }
+  return s.split(',').map((x) => x.trim()).filter(Boolean)
+}
+
 const highlightList = computed(() => {
   if (!product.value?.highlights) return []
-  return product.value.highlights.split(',').map(s => s.trim()).filter(Boolean)
+  return parseMediaList(product.value.highlights)
 })
 
 const canBook = computed(() =>
@@ -671,6 +719,7 @@ async function loadProduct() {
   try {
     const data = await getProductDetail(route.params.id)
     product.value = data
+    carouselIndex.value = 0
     const pkgResp = await getProductPackages(route.params.id)
     packages.value = pkgResp.items || []
     if (activePackages.value.length === 1) {
@@ -1095,4 +1144,45 @@ watch(locale, () => loadProduct())
 .review-reply strong {
   color: #e8a33a;
 }
+.carousel-main { position: relative }
+.carousel-nav {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 34px;
+  border: none;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  color: #fff;
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
+  z-index: 3;
+}
+.carousel-nav.prev { left: 10px }
+.carousel-nav.next { right: 10px }
+.detail-video-card {
+  margin: 12px 16px;
+  background: #fff;
+  border-radius: 12px;
+  padding: 12px 14px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+.video-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.video-header h3 { font-size: 16px; margin: 0 }
+.video-emoji { font-size: 18px }
+.detail-video {
+  width: 100%;
+  max-height: 420px;
+  border-radius: 8px;
+  background: #000;
+  display: block;
+}
+.video-hls-note a { color: #2563eb; font-size: 14px; text-decoration: none }
 </style>

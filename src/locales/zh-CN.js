@@ -192,6 +192,7 @@ export default {
     calendarTip: '① 以下价格按1份起订，计算平均每份套餐价格',
     productAlbum: '产品相册',
     noImages: '暂无图片',
+    productVideo: '宣传视频',
     confirmBookingInfo: '确认预订信息',
     labelProduct: '产品',
     labelPackage: '套餐',

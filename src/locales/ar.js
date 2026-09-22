@@ -190,6 +190,7 @@ export default {
     calendarTip: '① الأسعار أدناه لكل باقة على أساس وحدة واحدة',
     productAlbum: 'ألبوم المنتج',
     noImages: 'لا توجد صور',
+    productVideo: 'الفيديو الترويجي',
     confirmBookingInfo: 'تأكيد الحجز',
     labelProduct: 'المنتج',
     labelPackage: 'الباقة',

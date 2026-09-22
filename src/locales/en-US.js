@@ -190,6 +190,7 @@ export default {
     calendarTip: '① Prices below are per package based on 1 unit',
     productAlbum: 'Product album',
     noImages: 'No images',
+    productVideo: 'Promo Video',
     confirmBookingInfo: 'Confirm booking',
     labelProduct: 'Product',
     labelPackage: 'Package',

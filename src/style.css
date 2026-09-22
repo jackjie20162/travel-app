@@ -68,6 +68,7 @@ img{max-width:100%}
 .product-card:hover{transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.08)}
 .card-cover{height:120px;display:grid;place-items:center;background:linear-gradient(135deg,#e8ecf1,#f0f4f8);position:relative}
 .cover-emoji{font-size:40px}
+.cover-img{width:100%;height:100%;object-fit:cover;display:block}
 .fav-btn{position:absolute;inset-block-start:8px;inset-inline-end:8px;background:rgba(255,255,255,.9);border:none;border-radius:50%;width:32px;height:32px;font-size:16px;cursor:pointer;display:grid;place-items:center}
 .card-body{padding:12px}
 .card-dest{font-size:11px;color:#94a3b8;text-transform:uppercase;letter-spacing:1px}
@@ -88,6 +89,7 @@ img{max-width:100%}
 .list-item{display:flex;align-items:center;gap:14px;background:#fff;border-radius:14px;padding:14px;border:1px solid #eee;cursor:pointer;transition:border-color .2s}
 .list-item:hover{border-color:#1a1a2e}
 .item-icon{font-size:32px;width:48px;text-align:center;flex-shrink:0}
+.item-icon .cover-img{width:48px;height:48px;border-radius:8px}
 .item-info{flex:1;min-width:0}
 .item-info h3{font-size:15px;margin:2px 0}
 .item-info small{color:#94a3b8;font-size:12px}

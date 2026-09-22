@@ -22,7 +22,10 @@
     <div v-else-if="!products.length" class="center empty">{{ t('explore.noResults') }}</div>
     <div v-else class="product-list">
       <div v-for="p in products" :key="p.id" class="list-item" @click="goProduct(p)">
-        <div class="item-icon">{{ destEmoji(p.destination) }}</div>
+        <div class="item-icon">
+          <img v-if="productCoverUrl(p)" :src="productCoverUrl(p)" class="cover-img" alt="" loading="lazy" />
+          <template v-else>{{ destEmoji(p.destination) }}</template>
+        </div>
         <div class="item-info">
           <h3>{{ p.title }}</h3>
           <small>{{ p.destination || 'Dubai' }} · {{ p.code }}</small>
@@ -42,6 +45,7 @@ import { ref, onMounted, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { getProducts } from '../api.js'
 import { useLocale } from '../composables/useLocale.js'
+import { productCoverUrl } from '../utils/media.js'
 
 const route = useRoute()
 const router = useRouter()

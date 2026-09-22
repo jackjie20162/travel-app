@@ -23,3 +23,25 @@ export function resolveMediaList(list) {
   if (!Array.isArray(list)) return []
   return list.map(resolveMediaUrl).filter(Boolean)
 }
+
+// 取商品封面：coverImage 优先，落回 images 第一张（兼容 JSON 数组/逗号分隔），并解析本地相对路径
+export function productCoverUrl(product) {
+  if (!product) return ''
+  let raw = product.coverImage || product.cover_image || ''
+  if (!raw && product.images) {
+    const imgs = product.images
+    if (Array.isArray(imgs)) {
+      raw = typeof imgs[0] === 'string' ? imgs[0] : (imgs[0]?.url || '')
+    } else {
+      const s = String(imgs).trim()
+      if (s.startsWith('[')) {
+        try {
+          const arr = JSON.parse(s)
+          if (Array.isArray(arr) && arr.length) raw = typeof arr[0] === 'string' ? arr[0] : (arr[0]?.url || '')
+        } catch { /* 落回逗号解析 */ }
+      }
+      if (!raw) raw = s.split(',')[0]?.trim() || ''
+    }
+  }
+  return resolveMediaUrl(raw)
+}

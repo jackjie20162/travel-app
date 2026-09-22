@@ -42,7 +42,8 @@
       <div v-else class="product-grid">
         <article v-for="p in products" :key="p.id" class="product-card" @click="goProduct(p)">
           <div class="card-cover">
-            <span class="cover-emoji">{{ destEmoji(p.destination) }}</span>
+            <img v-if="productCoverUrl(p)" :src="productCoverUrl(p)" class="cover-img" alt="" loading="lazy" />
+            <span v-else class="cover-emoji">{{ destEmoji(p.destination) }}</span>
             <button class="fav-btn" @click.stop="toggle(p.id)">
               {{ isFav(p.id) ? '♥' : '♡' }}
             </button>
@@ -89,6 +90,7 @@ import { useRouter } from 'vue-router'
 import { getProducts } from '../api.js'
 import { useFavorites } from '../composables/favorites.js'
 import { useLocale } from '../composables/useLocale.js'
+import { productCoverUrl } from '../utils/media.js'
 
 const router = useRouter()
 const { isFav, toggle } = useFavorites()

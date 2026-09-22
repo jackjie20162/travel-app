@@ -392,6 +392,7 @@ import { useFavorites } from '../composables/favorites.js'
 import { useUser } from '../composables/user.js'
 import { useLocale } from '../composables/useLocale.js'
 import PickupRangeMap from '../components/PickupRangeMap.vue'
+import { resolveMediaUrl } from '../utils/media.js'
 
 const route = useRoute()
 const router = useRouter()
@@ -443,15 +444,16 @@ const activePackages = computed(() =>
 const allImages = computed(() => {
   if (!product.value) return []
   const imgs = []
-  if (product.value.coverImage) imgs.push(product.value.coverImage)
+  if (product.value.coverImage) imgs.push(resolveMediaUrl(product.value.coverImage))
   parseMediaList(product.value.images).forEach(img => {
-    if (!imgs.includes(img)) imgs.push(img)
+    const url = resolveMediaUrl(img)
+    if (url && !imgs.includes(url)) imgs.push(url)
   })
   return imgs
 })
 
 // 当前轮播主图
-const currentImage = computed(() => allImages.value[carouselIndex.value] || product.value?.coverImage || '')
+const currentImage = computed(() => allImages.value[carouselIndex.value] || resolveMediaUrl(product.value?.coverImage) || '')
 
 function prevImage() {
   const n = allImages.value.length
@@ -465,8 +467,8 @@ function nextImage() {
   carouselIndex.value = (carouselIndex.value + 1) % n
 }
 
-// 宣传视频：mp4 直链直接播放；HLS(.m3u8) 降级为外链打开
-const videoUrl = computed(() => product.value?.videoUrl || product.value?.video_url || '')
+// 宣传视频：mp4 直链直接播放；HLS(.m3u8) 降级为外链打开；本地相对路径补上传服务地址
+const videoUrl = computed(() => resolveMediaUrl(product.value?.videoUrl || product.value?.video_url || ''))
 const hasVideo = computed(() => !!videoUrl.value)
 const videoIsHls = computed(() => /\.m3u8($|\?)/i.test(videoUrl.value))
 

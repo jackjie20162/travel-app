@@ -7,7 +7,7 @@
 
     <!-- 咨询商品上下文：从商品详情“问客服”带入 -->
     <div v-if="consultProduct" class="consult-bar" @click="openProduct(consultProduct)">
-      <img v-if="consultProduct.coverImage" :src="consultProduct.coverImage" class="cb-cover" alt="" />
+      <img v-if="consultProduct.coverImage" :src="resolveMediaUrl(consultProduct.coverImage)" class="cb-cover" alt="" />
       <div v-else class="cb-cover cb-cover-ph">🏙️</div>
       <div class="cb-info">
         <div class="cb-label">正在咨询</div>
@@ -45,7 +45,7 @@
           />
           <!-- 商品卡片消息 -->
           <div v-else-if="msgType(m) === CONTENT_TYPE.PRODUCT" class="product-card" @click="goProduct(m)">
-            <img v-if="productOf(m).cover" :src="productOf(m).cover" class="pc-cover" alt="" />
+            <img v-if="productOf(m).cover" :src="resolveMediaUrl(productOf(m).cover)" class="pc-cover" alt="" />
             <div v-else class="pc-cover pc-cover-ph">🏙️</div>
             <div class="pc-info">
               <div class="pc-name">{{ productOf(m).name || '商品' }}</div>
@@ -100,6 +100,7 @@ import {
 } from './api'
 import { getProductDetail } from '../../api.js'
 import { useUser } from '../../composables/user.js'
+import { resolveMediaUrl } from '../../utils/media.js'
 import { formatClock } from './format'
 
 const route = useRoute()

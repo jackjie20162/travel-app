@@ -16,6 +16,16 @@
       <span v-if="consultProduct.minPrice" class="cb-price">¥{{ consultProduct.minPrice }}起</span>
     </div>
 
+    <!-- 咨询订单上下文：从订单详情“咨询此订单”带入 -->
+    <div v-else-if="consultOrder" class="consult-bar" @click="goOrderNo(consultOrder.orderNo)">
+      <div class="cb-cover cb-cover-ph">📋</div>
+      <div class="cb-info">
+        <div class="cb-label">正在咨询订单</div>
+        <div class="cb-name">{{ consultOrder.productTitle || consultOrder.orderNo }}</div>
+      </div>
+      <span v-if="consultOrder.orderNo" class="cb-price mono">{{ consultOrder.orderNo }}</span>
+    </div>
+
     <div ref="scrollEl" class="chat-scroll">
       <div v-if="hasMore" class="load-more">
         <button class="more-btn" :disabled="loadingHistory" @click="onLoadMore">
@@ -51,6 +61,21 @@
               <div class="pc-name">{{ productOf(m).name || '商品' }}</div>
               <div v-if="productOf(m).price" class="pc-price">¥{{ productOf(m).price }} 起</div>
               <div class="pc-hint">点击查看商品 ›</div>
+            </div>
+          </div>
+          <!-- 订单卡片消息 -->
+          <div v-else-if="msgType(m) === CONTENT_TYPE.ORDER" class="order-card" @click="goOrderMsg(m)">
+            <div class="oc-icon">📋</div>
+            <div class="oc-info">
+              <div class="oc-name">{{ orderOf(m).title || '订单' }}</div>
+              <div class="oc-no">{{ orderOf(m).orderNo }}</div>
+              <div class="oc-meta">
+                <em v-if="orderOf(m).date">{{ orderOf(m).date }}</em>
+                <em v-if="orderOf(m).quantity">{{ orderOf(m).quantity }} 份</em>
+                <em v-if="orderOf(m).amount">{{ orderOf(m).amount }} {{ orderOf(m).currency }}</em>
+                <em v-if="orderOf(m).status" class="oc-status">{{ statusOf(orderOf(m).status) }}</em>
+              </div>
+              <div class="oc-hint">点击查看订单 ›</div>
             </div>
           </div>
           <!-- 文本消息 -->
@@ -97,15 +122,19 @@ import {
   uploadImage,
   buildProductContent,
   parseProductContent,
+  buildOrderContent,
+  parseOrderContent,
 } from './api'
-import { getProductDetail } from '../../api.js'
+import { getProductDetail, getOrder } from '../../api.js'
 import { useUser } from '../../composables/user.js'
+import { useLocale } from '../../composables/useLocale.js'
 import { resolveMediaUrl } from '../../utils/media.js'
 import { formatClock } from './format'
 
 const route = useRoute()
 const router = useRouter()
 const user = useUser()
+const { t } = useLocale()
 
 const status = ref('connecting') // connecting | online | offline | error
 const messages = ref([]) // 单会话消息（升序）
@@ -116,11 +145,12 @@ const loadingHistory = ref(false)
 const scrollEl = ref(null)
 const toast = ref('')
 const consultProduct = ref(null) // 从商品详情带入的咨询商品
+const consultOrder = ref(null) // 从订单详情“咨询此订单”带入的咨询订单
 const uploading = ref(false)
 const previewUrl = ref('')
 
 let pendingLoadMore = false
-let productCardSent = false
+let consultSent = false
 let client = null
 
 const connected = computed(() => status.value === 'online')
@@ -138,9 +168,22 @@ function msgType(m) {
 function productOf(m) {
   return parseProductContent(m.content) || {}
 }
+function orderOf(m) {
+  return parseOrderContent(m.content) || {}
+}
+function statusOf(status) {
+  return status ? t(`status.${status}`) : ''
+}
 function goProduct(m) {
   const p = productOf(m)
   if (p.productId) router.push(`/product/${p.productId}`)
+}
+function goOrderMsg(m) {
+  const o = orderOf(m)
+  if (o.orderNo) router.push(`/order/${o.orderNo}`)
+}
+function goOrderNo(orderNo) {
+  if (orderNo) router.push(`/order/${orderNo}`)
 }
 function openProduct(p) {
   if (p?.id) router.push(`/product/${p.id}`)
@@ -166,10 +209,8 @@ function buildHandlers() {
         session.value = merchant
         if (!messages.value.length) loadHistory(merchant.sessionId, 0)
       }
-      // 带商品上下文进入：自动发送一次商品卡片，确保商户看到咨询的商品
-      if (consultProduct.value && !productCardSent) {
-        sendProductCard(consultProduct.value)
-      }
+      // 带商品/订单上下文进入：自动发送一次卡片，确保商户看到咨询的对象
+      trySendConsultCard()
     },
     onHistory: ({ sessionId, list, hasMore: more }) => {
       if (session.value && sessionId !== session.value.sessionId) return
@@ -258,10 +299,16 @@ function onSend() {
   draft.value = ''
 }
 
-function sendProductCard(p) {
-  if (!p || productCardSent) return
-  productCardSent = true
-  sendChatMessage(buildProductContent(p), CONTENT_TYPE.PRODUCT)
+/** 咨询卡片（商品/订单）：会话就绪后只自动发送一次 */
+function trySendConsultCard() {
+  if (consultSent) return
+  if (consultProduct.value) {
+    consultSent = true
+    sendChatMessage(buildProductContent(consultProduct.value), CONTENT_TYPE.PRODUCT)
+  } else if (consultOrder.value) {
+    consultSent = true
+    sendChatMessage(buildOrderContent(consultOrder.value), CONTENT_TYPE.ORDER)
+  }
 }
 
 async function onPickImage(e) {
@@ -331,6 +378,15 @@ onMounted(async () => {
       consultProduct.value = await getProductDetail(productId)
     } catch {
       /* 商品加载失败不阻塞客服会话 */
+    }
+  }
+  // 加载咨询订单上下文（从订单详情“咨询此订单”带入）
+  const orderNo = route.query.orderNo
+  if (orderNo) {
+    try {
+      consultOrder.value = await getOrder(orderNo)
+    } catch {
+      /* 订单加载失败不阻塞客服会话 */
     }
   }
   client = new ImClient(buildImWsUrl, buildHandlers())
@@ -547,6 +603,66 @@ onUnmounted(() => client && client.close())
   margin-top: 4px;
 }
 .pc-hint {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+.order-card {
+  display: flex;
+  gap: 10px;
+  background: #fff;
+  border: 1px solid #eee;
+  border-left: 3px solid #0f766e;
+  border-radius: 12px;
+  padding: 10px;
+  width: 250px;
+  cursor: pointer;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+}
+.oc-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  background: #f0fbfa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 22px;
+}
+.oc-info {
+  flex: 1;
+  min-width: 0;
+}
+.oc-name {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1a2e;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.oc-no {
+  font-size: 11px;
+  color: #94a3b8;
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+.oc-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 4px;
+  font-size: 11px;
+  color: #475569;
+}
+.oc-meta em {
+  font-style: normal;
+}
+.oc-status {
+  color: #0f766e;
+  font-weight: 600;
+}
+.oc-hint {
   font-size: 11px;
   color: #94a3b8;
   margin-top: 4px;

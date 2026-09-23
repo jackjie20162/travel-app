@@ -68,6 +68,7 @@
         <button v-if="canCancel" class="btn-danger" @click="showCancelDialog">{{ t('order.cancelOrder') }}</button>
         <button v-if="canRequestRefund" class="btn-warning" @click="showRefundDialog">{{ t('order.requestRefund') }}</button>
         <router-link to="/orders" class="btn-secondary">{{ t('order.backToList') }}</router-link>
+        <router-link :to="{ path: '/support', query: { orderNo: order.orderNo } }" class="btn-secondary">{{ t('order.consultOrder') }}</router-link>
         <router-link to="/" class="btn-primary">{{ t('order.continueBrowse') }}</router-link>
       </div>
     </template>

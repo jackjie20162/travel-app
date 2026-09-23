@@ -384,6 +384,7 @@ export default {
     reviewSection: 'تقييم الطلب',
     reviewPrompt: 'هل أنت راضٍ عن هذه الرحلة؟ شارك تجربتك!',
     writeReview: 'اكتب تقييمًا',
+    consultOrder: 'استفسر عن هذا الطلب',
     cancelOrder: 'إلغاء الطلب',
     requestRefund: 'طلب استرداد',
     backToList: 'العودة إلى قائمة الطلبات',

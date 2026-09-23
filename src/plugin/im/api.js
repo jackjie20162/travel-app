@@ -50,8 +50,8 @@ export function normalizeSession(s) {
   }
 }
 
-// IM 内容类型（与 im-common/constant ContentType 保持一致）
-export const CONTENT_TYPE = { TEXT: 1, IMAGE: 2, PRODUCT: 3 }
+// IM 内容类型（与 im-common/constant ContentType 保持一致，4=订单卡片）
+export const CONTENT_TYPE = { TEXT: 1, IMAGE: 2, PRODUCT: 3, ORDER: 4 }
 
 // IM 网关 HTTP 基址：优先 VITE_IM_API_URL，否则从 WS 基址推导（ws->http，去掉 /ws）
 export function getImHttpBase() {
@@ -89,6 +89,32 @@ export function parseProductContent(content) {
   try {
     const o = JSON.parse(content)
     return o && typeof o === 'object' ? o : null
+  } catch {
+    return null
+  }
+}
+
+// 构造订单卡片消息 content；核心字段与后端 imnotify.OrderCard 对齐，
+// quantity/productId 为前端附加展示字段
+export function buildOrderContent(order) {
+  return JSON.stringify({
+    orderNo: order.orderNo || '',
+    title: order.productTitle || order.productName || order.title || '',
+    package: order.packageName || order.package || '',
+    date: order.date || order.serviceDate || '',
+    quantity: order.quantity != null ? Number(order.quantity) : undefined,
+    amount: order.totalAmount != null ? Number(order.totalAmount) : (order.amount != null ? Number(order.amount) : 0),
+    currency: order.currency || '',
+    status: order.status || '',
+    productId: order.productId || undefined,
+  })
+}
+
+// 解析订单卡片消息 content，失败返回 null
+export function parseOrderContent(content) {
+  try {
+    const o = JSON.parse(content)
+    return o && typeof o === 'object' && o.orderNo ? o : null
   } catch {
     return null
   }

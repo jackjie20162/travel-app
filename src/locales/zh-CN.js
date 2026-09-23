@@ -386,6 +386,7 @@ export default {
     reviewSection: '订单评价',
     reviewPrompt: '您对这次旅行满意吗？快来分享您的体验吧！',
     writeReview: '写评价',
+    consultOrder: '咨询此订单',
     cancelOrder: '取消订单',
     requestRefund: '申请退款',
     backToList: '返回订单列表',

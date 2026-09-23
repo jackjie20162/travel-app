@@ -384,6 +384,7 @@ export default {
     reviewSection: 'Order review',
     reviewPrompt: 'Satisfied with this trip? Share your experience!',
     writeReview: 'Write a review',
+    consultOrder: 'Ask about this order',
     cancelOrder: 'Cancel order',
     requestRefund: 'Request refund',
     backToList: 'Back to order list',

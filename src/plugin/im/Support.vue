@@ -2,6 +2,7 @@
   <div class="page-support">
     <div class="support-bar">
       <span class="support-title">在线客服</span>
+      <span v-if="connFailed()" class="offline-tip">未连接，消息将改走接口发送</span>
       <span class="conn-pill" :class="status">{{ statusText }}</span>
     </div>
 
@@ -86,8 +87,8 @@
     </div>
 
     <div class="chat-composer">
-      <label class="img-btn" :class="{ disabled: uploading || !connected }" title="发送图片">
-        <input type="file" accept="image/*" :disabled="uploading || !connected" @change="onPickImage" style="display:none" />
+      <label class="img-btn" :class="{ disabled: uploading }" title="发送图片">
+        <input type="file" accept="image/*" :disabled="uploading" @change="onPickImage" style="display:none" />
         <span>{{ uploading ? '⏳' : '🖼️' }}</span>
       </label>
       <textarea
@@ -152,6 +153,8 @@ const previewUrl = ref('')
 let pendingLoadMore = false
 let consultSent = false
 let client = null
+// HTTP 兜底发送后网关回传的对端 im_uid：缓存以免每条消息重复懒注册
+let fallbackPeerUid = ''
 
 const connected = computed(() => status.value === 'online')
 const statusText = computed(
@@ -160,7 +163,11 @@ const statusText = computed(
       status.value
     ] || status.value,
 )
-const canSend = computed(() => connected.value && draft.value.trim().length > 0)
+const canSend = computed(() => draft.value.trim().length > 0)
+// 已尝试且失败（imClient 仍会后台重连，期间发送走接口）
+function connFailed() {
+  return status.value === 'offline' || status.value === 'error'
+}
 
 function msgType(m) {
   return m.contentType || CONTENT_TYPE.TEXT
@@ -201,6 +208,8 @@ function buildHandlers() {
     onStatus: (s) => {
       status.value = s
       if (s === 'online') client.loadSessions()
+      // 重试后仍连不上：带咨询上下文时直接退回接口把卡片发出去
+      if (s === 'offline' || s === 'error') trySendConsultCard()
     },
     onSessions: (list) => {
       // 取商户客服会话（peer_type=2）
@@ -269,39 +278,60 @@ function nextOptimisticSeq() {
   return max + 1
 }
 
-// 统一发送入口：寻址（已绑定会话用 im_uid，否则用商户业务身份）+ 乐观追加
+// 统一发送入口：寻址（已绑定会话用 im_uid，否则用商户业务身份）+ 乐观追加。
+// WebSocket 在线走长连接；未连接则退回网关 HTTP 接口，保证断线也能发出去。
 function sendChatMessage(content, contentType) {
-  if (!connected.value) return
-  if (session.value) {
-    client.sendChat({ to: session.value.peerImUid, content, contentType })
-  } else {
-    const { toType, toBizUid } = getSupportTarget()
-    client.sendChat({ toType, toBizUid, content, contentType })
+  const target = session.value?.peerImUid
+    ? { to: session.value.peerImUid }
+    : fallbackPeerUid
+      ? { to: fallbackPeerUid }
+      : getSupportTarget()
+  if (!target.to && !target.toBizUid) {
+    showToast('未确定咨询对象，发送失败')
+    return
   }
-  messages.value = dedupMerge(messages.value, [
-    {
-      msgId: '',
-      sessionId: session.value?.sessionId || '',
-      fromUid: '',
-      toUid: session.value?.peerImUid || '',
-      content,
-      contentType,
-      seq: nextOptimisticSeq(),
-      time: Date.now(),
-    },
-  ])
+  const optimistic = {
+    msgId: '',
+    sessionId: session.value?.sessionId || '',
+    fromUid: '',
+    toUid: target.to || '',
+    content,
+    contentType,
+    seq: nextOptimisticSeq(),
+    time: Date.now(),
+  }
+  messages.value = dedupMerge(messages.value, [optimistic])
+
+  if (connected.value && client) {
+    client.sendChat({ ...target, content, contentType })
+    return
+  }
+  sendMsgViaHttp({ ...target, content, contentType })
+    .then((toImUid) => {
+      // 回传对端 im_uid，后续消息直接按 im_uid 寻址，免重复懒注册
+      if (toImUid && !target.to) fallbackPeerUid = toImUid
+    })
+    .catch((err) => {
+      messages.value = messages.value.filter((m) => m !== optimistic)
+      showToast(err.message || '发送失败，请重试')
+    })
 }
 
 function onSend() {
   const text = draft.value.trim()
-  if (!text || !connected.value) return
+  if (!text) return
   sendChatMessage(text, CONTENT_TYPE.TEXT)
   draft.value = ''
 }
 
-/** 咨询卡片（商品/订单）：会话就绪后只自动发送一次 */
+/** 咨询卡片（商品/订单）：会话就绪或可直接兜底发送时只自动发送一次 */
 function trySendConsultCard() {
   if (consultSent) return
+  if (!consultProduct.value && !consultOrder.value) return
+  // WS 在线直接发（无会话时按商户业务身份寻址）；已确认连不上才退回接口兜底
+  const viaWs = connected.value
+  const viaHttp = connFailed() && !!(getSupportTarget().toBizUid || fallbackPeerUid)
+  if (!viaWs && !viaHttp) return
   if (consultProduct.value) {
     consultSent = true
     sendChatMessage(buildProductContent(consultProduct.value), CONTENT_TYPE.PRODUCT)
@@ -315,10 +345,6 @@ async function onPickImage(e) {
   const file = e.target.files?.[0]
   e.target.value = ''
   if (!file) return
-  if (!connected.value) {
-    showToast('未连接，无法发送图片')
-    return
-  }
   uploading.value = true
   try {
     const url = await uploadImage(file)
@@ -391,6 +417,8 @@ onMounted(async () => {
   }
   client = new ImClient(buildImWsUrl, buildHandlers())
   client.connect()
+  // 不在此处直接发送咨询卡片：避免与即将建立的 WS 抢跑；
+  // 连上后由 onSessions 触发，连不上由 onStatus(offline/error) 触发兜底
 })
 
 onUnmounted(() => client && client.close())
@@ -430,6 +458,13 @@ onUnmounted(() => client && client.close())
 .conn-pill.error {
   background: #fee2e2;
   color: #dc2626;
+}
+/* WS 未连上时的降级提示：消息退回 HTTP 接口发送 */
+.offline-tip {
+  flex: 1;
+  text-align: center;
+  font-size: 11px;
+  color: #b45309;
 }
 /* 咨询商品条 */
 .consult-bar {

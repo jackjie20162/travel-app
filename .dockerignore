@@ -1,0 +1,10 @@
+node_modules
+src
+src-tauri
+.env
+.env.example
+index.html
+package.json
+pnpm-lock.yaml
+vite.config.js
+*.md

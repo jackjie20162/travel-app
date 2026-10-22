@@ -31,7 +31,7 @@
       <!-- 2. 价格 + 销量 -->
       <div class="detail-price-row">
         <div class="price-main">
-          <span class="price-value">{{ formatPrice(displayMinPrice) }}</span>
+          <span class="price-value">{{ formatPrice(displayMinPrice, productCurrency) }}</span>
           <span class="price-unit">{{ t('product.from') }}</span>
           <span class="price-info-icon">ⓘ</span>
         </div>
@@ -111,7 +111,7 @@
           >
             <span class="date-weekday">{{ d.weekday }}</span>
             <span class="date-day">{{ d.day }}</span>
-            <span class="date-price" v-if="d.price !== null">{{ formatPrice(d.price) }}</span>
+            <span class="date-price" v-if="d.price !== null">{{ formatPrice(d.price, d.currency || productCurrency) }}</span>
             <span class="date-unavailable" v-else>{{ t('product.unavailable') }}</span>
           </div>
           <div class="date-cell more-dates" @click="openCalendar">
@@ -134,7 +134,7 @@
             <div class="pkg-name">{{ pkg.name }}</div>
             <div class="pkg-desc">{{ pkg.code }}</div>
             <div class="pkg-price">
-              <span class="pkg-price-value">{{ formatPrice(displayMinPrice) }}</span>
+              <span class="pkg-price-value">{{ formatPrice(displayMinPrice, productCurrency) }}</span>
               <span class="pkg-price-unit">{{ t('product.from') }}</span>
             </div>
           </div>
@@ -308,7 +308,7 @@
               @click="d.available && selectDateFromCal(d.dateStr)"
             >
               <span class="cal-day-num">{{ d.day }}</span>
-              <span class="cal-day-price" v-if="d.price !== null">{{ formatPrice(d.price) }}</span>
+              <span class="cal-day-price" v-if="d.price !== null">{{ formatPrice(d.price, d.currency || productCurrency) }}</span>
               <span class="cal-day-unavail" v-else-if="!d.available">{{ t('product.unavailable') }}</span>
               <span class="cal-holiday-tag" v-if="d.holiday">{{ d.holiday }}</span>
             </div>
@@ -335,7 +335,7 @@
               @click="d.available && selectDateFromCal(d.dateStr)"
             >
               <span class="cal-day-num">{{ d.day }}</span>
-              <span class="cal-day-price" v-if="d.price !== null">{{ formatPrice(d.price) }}</span>
+              <span class="cal-day-price" v-if="d.price !== null">{{ formatPrice(d.price, d.currency || productCurrency) }}</span>
               <span class="cal-day-unavail" v-else-if="!d.available">{{ t('product.unavailable') }}</span>
               <span class="cal-holiday-tag" v-if="d.holiday">{{ d.holiday }}</span>
             </div>
@@ -370,7 +370,7 @@
             <div class="confirm-row"><span>{{ t('product.labelPeople') }}</span><span>{{ quantity }}</span></div>
             <div class="confirm-row total">
               <span>{{ t('product.labelTotal') }}</span>
-              <strong>{{ formatPrice((selectedInventory?.unitPrice || displayMinPrice) * quantity) }}</strong>
+              <strong>{{ formatPrice((selectedInventory?.unitPrice || displayMinPrice) * quantity, selectedInventory?.currency || productCurrency) }}</strong>
             </div>
           </div>
           <div class="modal-actions">
@@ -504,6 +504,9 @@ const displayMinPrice = computed(() => {
   return computedMinPrice.value || 0
 })
 
+// 产品/库存价格自身的存储币种（金额换算的来源币种），默认回退基准币 AED
+const productCurrency = computed(() => product.value?.currency || 'AED')
+
 // 中国法定节假日
 const holidays = {
   '2026-01-01': '元旦', '2026-01-02': '元旦', '2026-01-03': '元旦',
@@ -554,6 +557,7 @@ const dateStrip = computed(() => {
       weekday: weekdayLabels.value[d.getDay()],
       day: d.getDate(),
       price: inv ? inv.unitPrice : null,
+      currency: inv ? inv.currency : null,
       available,
     })
   }
@@ -580,6 +584,7 @@ function buildCalDays(year, month) {
       dateStr,
       day: d,
       price: inv ? inv.unitPrice : null,
+      currency: inv ? inv.currency : null,
       available,
       isToday: dateStr === todayStr,
       isWeekend: dayOfWeek === 0 || dayOfWeek === 6,

@@ -79,7 +79,7 @@ const payAmountText = computed(() => {
   if (lockedAmount != null && lockedCurrency) {
     return formatAmount(Number(lockedAmount), lockedCurrency)
   }
-  return formatPrice(totalAmount)
+  return formatPrice(totalAmount, route.query.currency)
 })
 
 function generateIdempotencyKey() {

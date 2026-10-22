@@ -10,8 +10,9 @@
         class="order-tab"
         :class="{ active: activeTab === tab.value }"
         @click="switchTab(tab.value)"
+        :title="t(tab.labelKey)"
       >
-        <span>{{ t(tab.labelKey) }}</span>
+        <span class="tab-icon">{{ tab.icon }}</span>
         <span v-if="badges[tab.value]" class="tab-badge">{{ badges[tab.value] > 99 ? '99+' : badges[tab.value] }}</span>
       </div>
     </div>
@@ -69,12 +70,12 @@ const total = ref(0)
 const badges = reactive({ PENDING_PAYMENT: 0, PENDING_ACCEPTANCE: 0 })
 
 const tabs = [
-  { value: '', labelKey: 'order.tabAll' },
-  { value: 'PENDING_PAYMENT', labelKey: 'status.PENDING_PAYMENT' },
-  { value: 'PENDING_ACCEPTANCE', labelKey: 'status.PENDING_ACCEPTANCE' },
-  { value: 'PENDING_VERIFY', labelKey: 'status.PENDING_VERIFY' },
-  { value: 'COMPLETED', labelKey: 'status.COMPLETED' },
-  { value: 'CANCELLED', labelKey: 'status.CANCELLED' },
+  { value: '', labelKey: 'order.tabAll', icon: '📋' },
+  { value: 'PENDING_PAYMENT', labelKey: 'status.PENDING_PAYMENT', icon: '💳' },
+  { value: 'PENDING_ACCEPTANCE', labelKey: 'status.PENDING_ACCEPTANCE', icon: '⏳' },
+  { value: 'PENDING_VERIFY', labelKey: 'status.PENDING_VERIFY', icon: '🔍' },
+  { value: 'COMPLETED', labelKey: 'status.COMPLETED', icon: '✅' },
+  { value: 'CANCELLED', labelKey: 'status.CANCELLED', icon: '❌' },
 ]
 
 function statusText(s) {
@@ -87,7 +88,7 @@ function orderAmount(o) {
   if (o && o.displayAmount != null && o.displayCurrency) {
     return formatAmount(o.displayAmount, o.displayCurrency)
   }
-  return formatPrice(o?.totalAmount)
+  return formatPrice(o?.totalAmount, o?.currency)
 }
 
 async function loadOrders(append = false) {
@@ -169,17 +170,19 @@ onMounted(() => {
 }
 .order-tabs::-webkit-scrollbar { display: none }
 .order-tab {
-  flex: 1;
+  flex-shrink: 0;
   min-width: 0;
   text-align: center;
-  padding: 10px 6px;
-  font-size: 13px;
-  color: #64748b;
+  padding: 10px 14px;
   cursor: pointer;
-  white-space: nowrap;
   position: relative;
   transition: color .2s, background .2s;
   border-bottom: 2px solid transparent;
+}
+.tab-icon {
+  font-size: 20px;
+  line-height: 1;
+  display: block;
 }
 .order-tab.active {
   color: #1a1a2e;

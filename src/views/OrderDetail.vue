@@ -133,7 +133,7 @@ function orderAmount(o) {
   if (o && o.displayAmount != null && o.displayCurrency) {
     return formatAmount(o.displayAmount, o.displayCurrency)
   }
-  return formatPrice(o?.totalAmount)
+  return formatPrice(o?.totalAmount, o?.currency)
 }
 
 async function loadOrder() {

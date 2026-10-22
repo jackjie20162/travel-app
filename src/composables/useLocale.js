@@ -27,10 +27,11 @@ export function useLocale() {
     applyLocale(next)
   }
 
-  /** 基准币(AED)金额 → 当前展示币种格式化（含换算）。 */
-  function formatPrice(amountBase, currency) {
+  /** 金额（以 from 币种存储，默认基准币 AED）→ 当前展示币种格式化（含换算）。 */
+  function formatPrice(amountBase, from) {
     return formatPriceUtil(amountBase, {
-      currency: currency || selectedCurrency.value,
+      currency: selectedCurrency.value,
+      from,
       locale: currentIntlLocale(),
     })
   }

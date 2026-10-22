@@ -53,7 +53,7 @@
             <h3>{{ p.title }}</h3>
             <p>{{ p.description || t('home.defaultDesc') }}</p>
             <div class="card-footer">
-              <strong>{{ formatPrice(p.minPrice) }}</strong>
+              <strong>{{ formatPrice(p.minPrice, p.currency) }}</strong>
               <span class="tag">{{ t('home.from') }}</span>
             </div>
           </div>

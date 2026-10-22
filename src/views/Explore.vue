@@ -32,7 +32,7 @@
           <p>{{ p.description || t('explore.defaultDesc') }}</p>
         </div>
         <div class="item-price">
-          <strong>{{ formatPrice(p.minPrice) }}</strong>
+          <strong>{{ formatPrice(p.minPrice, p.currency) }}</strong>
           <small>{{ t('explore.from') }}</small>
         </div>
       </div>

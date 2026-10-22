@@ -35,20 +35,17 @@
       <p v-for="(line, i) in cancelPolicyDetail" :key="i">{{ line }}</p>
     </div>
 
-    <!-- 人数步进器 -->
+    <!-- 人数 & 价格摘要 -->
     <section class="quantity-stepper-card">
       <div class="stepper-row">
         <div class="stepper-label">
           <span class="stepper-title">{{ t('booking.people') }}</span>
         </div>
         <div class="stepper-control">
-          <span class="stepper-price">{{ formatPrice(unitPrice) }}</span>
-          <button class="stepper-btn minus" :disabled="qty <= 1" @click="decreaseQty">−</button>
-          <span class="stepper-value">{{ qty }}</span>
-          <button class="stepper-btn plus" @click="increaseQty">+</button>
+          <span class="stepper-price">{{ formatPrice(unitPrice, currency) }}</span>
+          <span class="stepper-value">{{ travelers.length }}</span>
         </div>
       </div>
-      <div class="stepper-hint">{{ t('booking.maxBook', { max: maxQty }) }}</div>
     </section>
 
     <!-- 游客信息 -->
@@ -176,7 +173,7 @@
     <!-- 提交按钮 -->
     <div class="booking-action">
       <button class="btn-primary" :disabled="submitting || !canSubmit" @click="submitOrder">
-        {{ submitting ? t('common.submitting') : t('booking.confirmOrder', { amount: formatPrice(totalAmount) }) }}
+        {{ submitting ? t('common.submitting') : t('booking.confirmOrder', { amount: formatPrice(totalAmount, currency) }) }}
       </button>
     </div>
 
@@ -345,6 +342,7 @@ async function loadProductData() {
           : items[0]
         if (inv) {
           unitPrice.value = inv.unitPrice || product.minPrice || 0
+          if (inv.currency) currency.value = inv.currency
           maxQty.value = (inv.capacity - (inv.reserved || 0)) > 0
             ? (inv.capacity - (inv.reserved || 0))
             : 8
@@ -523,12 +521,14 @@ function increaseQty() {
 /** 添加一位游客（无上限，不允许重复） */
 function addTraveler() {
   travelers.value.push(emptyTraveler())
+  qty.value = travelers.value.length
 }
 
 /** 删除一位游客（至少保留 1 位） */
 function removeTraveler(idx) {
   if (travelers.value.length > 1) {
     travelers.value.splice(idx, 1)
+    qty.value = travelers.value.length
   }
 }
 
@@ -588,6 +588,7 @@ function selectSavedTraveler(st) {
     Object.assign(travelers.value[0], { ...st })
   } else {
     travelers.value.push({ ...st })
+    qty.value = travelers.value.length
   }
   showTravelersModal.value = false
 }

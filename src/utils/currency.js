@@ -85,27 +85,35 @@ export function isLoaded() {
   return loaded.value
 }
 
-/** 把基准币金额换算为目标币种金额（返回 Number，保留合理精度）。 */
-export function convert(amountBase, targetCode = selectedCurrency.value) {
-  const amt = Number(amountBase)
+/**
+ * 把 fromCode 币种金额换算为 targetCode 币种金额（返回 Number，保留合理精度）。
+ * 注意：rates 均以基准币(AED)为参照（1 AED = rate[X] X），而价格金额实际以其
+ * 自身币种(fromCode)存储（如商品 currency=USD 时金额就是美元）。因此需先折回
+ * 基准币再换算到目标币种：value = amount / rate[from] * rate[to]。
+ * fromCode 省略时按基准币处理，兼容旧的「金额即基准币」调用。
+ */
+export function convert(amount, targetCode = selectedCurrency.value, fromCode = BASE_CURRENCY) {
+  const amt = Number(amount)
   if (Number.isNaN(amt)) return 0
-  const rate = rates.value[targetCode] ?? rates.value[BASE_CURRENCY] ?? 1
+  const rateTo = rates.value[targetCode] ?? rates.value[BASE_CURRENCY] ?? 1
+  const rateFrom = rates.value[fromCode] ?? rates.value[BASE_CURRENCY] ?? 1
   const meta = getCurrencyMeta(targetCode)
   const factor = Math.pow(10, meta.decimals ?? 2)
-  return Math.round(amt * rate * factor) / factor
+  return Math.round((amt / rateFrom * rateTo) * factor) / factor
 }
 
 /**
- * 统一价格格式化：把「基准币(AED)整数元」金额换算并按目标币种符号/小数位格式化。
- * @param {number|string} amountBase 基准币金额（元）
- * @param {object} opts { currency, locale }
+ * 统一价格格式化：把「以 from 币种存储的金额」换算并按目标币种符号/小数位格式化。
+ * @param {number|string} amountBase 金额（单位为 opts.from 币种，默认基准币 AED）
+ * @param {object} opts { currency, from, locale } from=金额自身币种
  * @returns {string} 例如 "$1,234.00" / "1,234.00 د.إ" / "¥1,234.00"
  */
 export function formatPrice(amountBase, opts = {}) {
   const currency = opts.currency || selectedCurrency.value
+  const from = opts.from || BASE_CURRENCY
   const locale = opts.locale || 'en-US'
   if (amountBase == null || amountBase === '' || Number.isNaN(Number(amountBase))) return '--'
-  const value = convert(amountBase, currency)
+  const value = convert(amountBase, currency, from)
   if (value <= 0) return '--'
   const meta = getCurrencyMeta(currency)
   try {
